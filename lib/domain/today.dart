@@ -12,3 +12,15 @@ List<Dose> dosesToday(Iterable<Dose> doses, DateTime now) {
 }
 
 int totalMg(Iterable<Dose> doses) => doses.fold(0, (sum, d) => sum + d.mg);
+
+/// The most recent local moment whose clock reads [hour]:[minute] at or before
+/// [now]: today if that time has already happened, otherwise yesterday. Used to
+/// turn a picked time of day into a dose time, so logging "11 pm" at 12:30 am
+/// lands on the previous evening instead of in the future.
+DateTime lastOccurrence(int hour, int minute, DateTime now) {
+  final local = now.toLocal();
+  final today = DateTime(local.year, local.month, local.day, hour, minute);
+  return today.isAfter(local)
+      ? DateTime(local.year, local.month, local.day - 1, hour, minute)
+      : today;
+}

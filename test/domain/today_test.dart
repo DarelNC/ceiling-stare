@@ -50,4 +50,49 @@ void main() {
       }
     });
   });
+
+  group('lastOccurrence', () {
+    test('an earlier time of day means today', () {
+      expect(lastOccurrence(8, 0, now), DateTime(2026, 9, 20, 8, 0));
+    });
+
+    test('exactly now is still today, not yesterday', () {
+      expect(lastOccurrence(14, 30, now), DateTime(2026, 9, 20, 14, 30));
+    });
+
+    test('a later time of day means yesterday', () {
+      expect(lastOccurrence(14, 31, now), DateTime(2026, 9, 19, 14, 31));
+      expect(lastOccurrence(23, 0, now), DateTime(2026, 9, 19, 23, 0));
+    });
+
+    test('just after midnight, 23:00 is the previous evening', () {
+      final late = DateTime(2026, 9, 20, 0, 30);
+      expect(lastOccurrence(23, 0, late), DateTime(2026, 9, 19, 23, 0));
+    });
+
+    test('crosses month and year boundaries', () {
+      expect(
+        lastOccurrence(23, 0, DateTime(2026, 10, 1, 0, 10)),
+        DateTime(2026, 9, 30, 23, 0),
+      );
+      expect(
+        lastOccurrence(23, 0, DateTime(2027, 1, 1, 0, 10)),
+        DateTime(2026, 12, 31, 23, 0),
+      );
+    });
+
+    test('is never in the future and never a day or more old', () {
+      for (var h = 0; h < 24; h++) {
+        for (var m = 0; m < 60; m += 7) {
+          final r = lastOccurrence(h, m, now);
+          expect(r.isAfter(now), isFalse, reason: '$h:$m');
+          expect(now.difference(r), lessThan(const Duration(days: 1)));
+        }
+      }
+    });
+
+    test('a UTC `now` is read in local time', () {
+      expect(lastOccurrence(8, 0, now.toUtc()), DateTime(2026, 9, 20, 8, 0));
+    });
+  });
 }
