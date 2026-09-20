@@ -38,14 +38,17 @@ in-memory filtering can't do cheaply.
 ## Testing
 
 Highest-value target: the caffeine-remaining math, since it is pure and
-source-agnostic ([architecture.md](architecture.md)). It should be written test
-first, and reviewed rather than winged; a wrong number here is silently wrong to
-the user. The only test today is a boot smoke test in `test/widget_test.dart`
-(finds the `WIRED` header).
+source-agnostic ([architecture.md](architecture.md)). Written test first, with
+independently hand-computed expected values. Also covered: the model and
+repository (including corrupt data and concurrent writes), the today/preset
+logic, the mug, and the home screen through widget tests with an in-memory
+repository (`test/support/`). Widget tests use a fixed clock injected into
+`WiredApp`.
 
 **Verification:** `flutter analyze` and `flutter test` are clean, and the
-placeholder screen was built (`flutter build ios --simulator --debug`) and seen
-on the iPhone 17 Pro simulator on 2026-09-20: palette and all four fonts render.
+app was built (`flutter build ios --simulator --debug`) and exercised on the
+iPhone 17 Pro simulator on 2026-09-20: logging, Other, remove and undo,
+persistence across relaunch, and the over-limit state all behaved.
 **Gap:** never run on Android (no emulator or SDK used yet), and never on a
 physical device.
 

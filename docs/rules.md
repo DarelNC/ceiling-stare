@@ -18,7 +18,7 @@ matters.
 | File | Holds |
 |---|---|
 | [architecture.md](architecture.md) | how the pieces fit; the pure-logic seam; when the third-party-API rules would engage |
-| [stack.md](stack.md) | Flutter/Dart, storage (open), testing, fonts, license, branch |
+| [stack.md](stack.md) | Flutter/Dart, storage, testing, fonts, license, branch |
 | [design.md](design.md) | the no-AI-look constraint, the "New Cycle" identity as implemented, why reusing it is justified |
 | [product.md](product.md) | why this niche, naming pass, accounts/PII, health-claim framing |
 | [features/README.md](features/README.md) | feature index, backlog in order, cut/deferred list |
@@ -28,11 +28,12 @@ are read on demand.
 
 ## Current state
 
-Scaffold only. `lib/main.dart` is a placeholder screen that proves the palette
-and fonts load. No data model, no logging UI, no feature. `flutter analyze` and
-`flutter test` are clean. Launched and seen on the iOS simulator (iPhone 17 Pro,
-2026-09-20); **never run on Android**. One local commit, no remote, nothing
-pushed.
+v1 core loop is built: log a dose in one tap (five bundled presets, or a
+hand-entered amount), see today's total and an estimate of caffeine still
+active as a draining mug, remove with undo. All local, no accounts. Details in
+[features/](features/README.md). `flutter analyze` is clean and 51 tests pass.
+Run and seen on the iOS simulator (iPhone 17 Pro, 2026-09-20); **never run on
+Android**. Not yet built: backdating, history, notifications, safe-to-sleep.
 
 ## Hard rules
 
@@ -74,7 +75,7 @@ What each library file contributed, what was dropped, and why.
 |---|---|
 | `process.md` | **Kept in full**, including the required `docs/` split (adopted 2026-09-20), tiered lanes, adversarial pass, one-line commits, scope discipline. |
 | `architecture.md` | **Mostly N/A, one rule engages.** No backend or third-party API, so client-call/failover/hosting-shape/hard-cap/fallback rules are dormant. "Keep reusable logic separate from where the data comes from" applies to the decay math — see [architecture.md](architecture.md). |
-| `stack.md` | **Kept/adapted:** framework-fits-deployment (one Flutter codebase, no backend), test the pure logic first, MIT, `master`. **Dropped:** the typed/untyped-language tradeoff (Dart is typed; no untyped external parsing yet) and the caching rule (no request path) — the storage question is open instead. See [stack.md](stack.md). |
+| `stack.md` | **Kept/adapted:** framework-fits-deployment (one Flutter codebase, no backend), test the pure logic first, MIT, `master`. **Dropped:** the typed/untyped-language tradeoff (Dart is typed; no untyped external parsing yet) and the caching rule (no request path); local storage was decided as its own item. See [stack.md](stack.md). |
 | `design.md` | **Kept in full**, with Flutter equivalents of the banned patterns and the new "reusing a device needs its own reason" check applied to the shared identity. See [design.md](design.md). |
 | `product.md` | **Kept.** Naming pass still owed; accounts/PII resolved as local-only for v1. See [product.md](product.md). |
 

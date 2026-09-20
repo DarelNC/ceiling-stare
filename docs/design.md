@@ -43,25 +43,30 @@ centering exception is a single-element empty state.
 | Face | Family key in code |
 |---|---|
 | Archivo Black — headlines | `Archivo Black` |
-| Major Mono Display — labels / readouts | `Major Mono Display` |
+| Major Mono Display — readouts and the wordmark | `Major Mono Display` |
 | DM Serif Display italic — the human line | `DM Serif Display Italic` |
-| Space Grotesk — body/UI text | `Space Grotesk` |
+| Space Grotesk — labels, captions, body | `Space Grotesk` |
 
-**Palette** (values from `caffeinated/lib/main.dart`):
+**Palette** (values from `caffeinated/lib/main.dart`, declared in
+`lib/ui/tokens.dart`):
 
-| Token | Value | Declared in `lib/main.dart` |
+| Token | Value | Used for |
 |---|---|---|
-| `ground` | `#2A0F14` | yes |
-| `ink` | `#F6EFE6` | yes |
-| `mutedInk` | `#D8B6AD` | yes |
-| `dim` | `#8F6A62` | yes |
-| `rust` | `#8C2F1B` (used as the hard shadow colour) | yes |
-| `groundDeep` | `#140609` | not yet |
-| `emberGlow` | `#6B1F18` | not yet |
-| `signal` | `#E9FF4F` | not yet |
-| `alert` | `#FF5C1C` | not yet |
+| `ground` | `#2A0F14` | page background |
+| `groundDeep` | `#140609` | inside of the mug |
+| `ink` | `#F6EFE6` | primary text, borders |
+| `mutedInk` | `#D8B6AD` | labels, secondary text |
+| `dim` | `#8F6A62` | captions, scale ticks, disabled |
+| `rust` | `#8C2F1B` | every hard shadow |
+| `signal` | `#E9FF4F` | the liquid, press flash, focus underline |
+| `alert` | `#FF5C1C` | liquid past the reference limit |
+| `emberGlow` | `#6B1F18` | not declared yet; add when a screen uses it |
 
-Undeclared tokens get added when a real screen uses them, not before.
+Type roles as built: Archivo Black for the big number, the today total, button
+titles and the error headline. Space Grotesk for section labels, captions and
+body. Major Mono Display for readouts only: mug scale marks, the `MG` unit,
+log-row times and amounts, plus the `WIRED` wordmark. DM Serif italic for the
+one human line (the empty state).
 
 ## Why reuse this identity: the reuse check
 
@@ -86,19 +91,31 @@ were assigned for a screen-awake utility.
 
 - Major Mono Display in `caffeinated` served a live-running-state feel (ticker,
   labels). Here it earns its place only as an *instrument readout* (mg, hours
-  until clear). Where it would be used as a general "techy" signal, don't.
-- The mug-fill visual from `caffeinated` is **not** carried over by default. There
-  it showed a countdown of screen-awake time. Here the natural quantity is
-  caffeine *still active*, which drains rather than fills, so the same picture
-  would mean something different. It can still be the right answer (a mug
-  emptying reads well), but it needs its own reason and should be judged running
-  in the app, not from the resemblance. It is an open UX decision, listed in
-  [features/README.md](features/README.md), item 3.
+  until clear). Where it would be used as a general "techy" signal, don't. This
+  was enforced in practice: see the first entry under Rejected / tried.
+- **The mug-fill visual is reused, with its own reason, and kept.** In
+  `caffeinated` the mug showed a countdown of screen-awake time. Here the liquid
+  is caffeine *still active*: it rises when a drink is logged and drains as the
+  estimate decays, full at the 400 mg reference limit, orange past it. That is a
+  different quantity with a different direction of motion, and it reads
+  correctly at a glance in the running app (checked on the iOS simulator at
+  empty, 158 mg, and 478 mg). The reason is fit to the quantity, not familiarity.
 - Recheck this whole section if any single device from the identity ends up
   dominating the UI.
 
 ## Rejected / tried
 
-Nothing yet. The iterate-live rule (build variations in the running app, keep
-only the winner, record rejected directions here) is now possible on the iOS
-simulator; Android is still unverified. See [stack.md](stack.md).
+- **Major Mono Display for section labels** (`STILL ACTIVE`, `TAP TO LOG`,
+  `TODAY`). Built first, screenshotted, rejected: at 11 px its letterforms are
+  hard to read, and it was exactly the general "techy signal" use the reuse
+  check rules out. Replaced by Space Grotesk bold caps with letter-spacing, which
+  is also what `caffeinated` uses for labels.
+- **Material's default snackbar shadow.** Soft blur shadow broke the hard-shadow
+  rule; elevation set to 0 (flat ink bar, zero radius).
+- **No alternative to the mug was built.** The brief was to try the mug first,
+  and it worked, so nothing was compared. This is not a result that the mug beats
+  other metaphors, only that it isn't broken. Revisit if it stops carrying the
+  screen (for example once history charts share the page).
+
+Iterate-live is possible on the iOS simulator; Android is still unverified. See
+[stack.md](stack.md).
