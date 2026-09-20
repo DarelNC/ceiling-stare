@@ -6,6 +6,10 @@ import '../data/dose.dart';
 /// 2 to 10 hours), so anything built on this is an estimate.
 const defaultHalfLife = Duration(hours: 5);
 
+/// The commonly cited daily ceiling for healthy adults. Used only as the
+/// full-scale mark on the mug, not as advice; individuals differ.
+const referenceLimitMg = 400;
+
 /// Estimated caffeine (mg) still active at [now]: each dose decays
 /// exponentially from the moment it was taken, and the results are summed.
 ///
