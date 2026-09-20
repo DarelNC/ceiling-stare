@@ -8,6 +8,8 @@ One file per feature, created when that feature is actually decided:
 
 - [dose-model.md](dose-model.md) — `Dose` model and local storage behind a
   `DoseRepository`. No UI yet.
+- [decay-math.md](decay-math.md) — `remainingMg`: estimated caffeine still
+  active, a pure function over doses. No UI yet.
 
 `lib/main.dart` is still a placeholder screen that proves the palette and fonts
 load; it is not a feature.
@@ -24,10 +26,9 @@ explicitly when it's reached, not a commitment.
    drink presets (known mg values) ship in v1? That decides how much is content
    work versus a pure number-entry app. Presets must be bundled local data, not
    fetched (see [../architecture.md](../architecture.md)).
-2. **Caffeine remaining / half-life math.** The one real piece of domain logic.
-   Standard half-life is about 5 hours; open whether it is hardcoded or
-   adjustable. Written as a pure function and tested first, per
-   [../architecture.md](../architecture.md) and [../stack.md](../stack.md).
+2. ~~**Caffeine remaining / half-life math.**~~ **Done**, see
+   [decay-math.md](decay-math.md). Half-life is a parameter defaulting to 5
+   hours; no user-facing setting decided.
 3. **The core screen.** Fast log entry (few taps), today's total, and a live
    "how much is still active" readout. Two open calls live here: whether drink
    presets ship (carried from item 1; "few taps" is the deciding requirement),

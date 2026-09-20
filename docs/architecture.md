@@ -38,6 +38,7 @@ No storage, UI, or platform imports, and no knowledge of where a dose came from.
   [stack.md](stack.md) — this is the first thing worth a real test suite), and
   a later HealthKit/Health Connect import or a different local store feeds the
   same function instead of forcing a rewrite.
-- **Half-life:** standard value is about 5 hours. Whether it is hardcoded or an
-  input is an open decision, tracked in [features/README.md](features/README.md).
-  Making it an input to the function costs nothing structurally either way.
+- **Built:** `remainingMg` in `lib/domain/caffeine.dart` follows this seam. It
+  takes `Iterable<Dose>` and a `now`, imports only the `Dose` data class, and
+  never touches the repository. Half-life is a parameter with a 5-hour default;
+  see [features/decay-math.md](features/decay-math.md).
