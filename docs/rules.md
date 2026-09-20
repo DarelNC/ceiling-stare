@@ -1,81 +1,82 @@
 # Project rules
 
-Adapted from the workspace-level `frag-ment/rules/` library, the same way
-`caffeinated/docs/rules.md` was. This project is a sibling of `caffeinated`
-(same visual identity, same author, same workspace conventions) but a
-different product with a different shape — a caffeine intake tracker,
-cross-platform (Android + iOS) from day one, no foreground service or wake
-lock involved. What follows is what was kept, dropped, or reshaped, and why,
-same discipline as the sibling project.
+Durable project memory for **wired** (working codename): a caffeine intake
+tracker, Flutter, Android + iOS from day one, fully on-device. Adapted from the
+workspace library in `frag-ment/rules/`, following the layout in
+[`process.md`](../../rules/process.md) — one file per concern, never a single
+doc. This file started life as that single doc; on 2026-09-20 its contents were
+redistributed into the files below and the workspace rules were re-checked
+against the project (ledger at the bottom).
 
-## Why this project exists
+Sibling project: `caffeinated/` (keep-screen-awake, Android-only). Same author,
+same visual identity, different product. A decision made there is not
+automatically made here — see [design.md](design.md) for the one place that
+matters.
 
-`caffeinated` (keep-screen-awake utility) is Android-only by necessity — the
-feature needs a real background wake lock, which iOS doesn't grant to
-third-party apps at all. Market research done in that project's session
-(see its own history) showed the "keep screen awake" category isn't
-portable to iOS in any form worth shipping, but also surfaced a genuinely
-under-served, low-competition niche: caffeine intake tracking. Every
-competing app on both Play Store and the App Store tops out in the low
-thousands of installs/reviews — nobody has done for this category what
-Forest did for focus timers. This project is a real attempt at that gap,
-not a reskin of `caffeinated`.
+## Where things live
 
-## Kept, as-is (identical to caffeinated, not reinterpreted)
+| File | Holds |
+|---|---|
+| [architecture.md](architecture.md) | how the pieces fit; the pure-logic seam; when the third-party-API rules would engage |
+| [stack.md](stack.md) | Flutter/Dart, storage (open), testing, fonts, license, branch |
+| [design.md](design.md) | the no-AI-look constraint, the "New Cycle" identity as implemented, why reusing it is justified |
+| [product.md](product.md) | why this niche, naming pass, accounts/PII, health-claim framing |
+| [features/README.md](features/README.md) | feature index, backlog in order, cut/deferred list |
 
-- **The whole "New Cycle" design system** — Oxblood ground, the same four
-  bundled fonts (Archivo Black / Major Mono Display / DM Serif Display
-  italic / Space Grotesk), hard zero-blur offset shadows, zero corner
-  radius, signal-yellow as the one accent, flush-left layout with the
-  single-element-empty-state centering exception. This is deliberately
-  copied, not re-derived — see `caffeinated/docs/rules.md`'s own "Design
-  system: New Cycle" section for the full reasoning and the adaptation
-  calls already made there (palette choice, local font bundling instead of
-  a Google Fonts runtime fetch, how the centering exception was read).
-- **stack.md — License: MIT unless there's a specific reason otherwise.**
-- **stack.md — Default branch for new repos is `master`.**
-- **process.md — tiered documentation/review discipline**, the adversarial
-  pass, and scope discipline / cut list. Same as `caffeinated`.
+`CLAUDE.md` at the project root `@`-imports this file and `design.md`; the rest
+are read on demand.
 
-## Kept, adapted
+## Current state
 
-- **product.md — Do a real naming pass before anything goes public.**
-  "wired" is a working codename picked to unblock starting the project,
-  same as "Caffeinated" originally was — not checked for collision or
-  trademark yet. Do that pass before any public listing, same rule,
-  independently applied (a name check on one sibling project says nothing
-  about the other).
-- **product.md — Weigh accounts/login/PII as a real decision.** This one
-  actually needs a real decision here, unlike `caffeinated` where it was
-  trivially satisfied. A caffeine log is a plausible candidate for
-  cross-device sync (Health Connect on Android, HealthKit on iOS, or a
-  simple cloud backup) — that's a legitimate, common feature for this
-  category, but it's a decision to make explicitly when it comes up, not a
-  default to reach for because "real apps have sync." v1 default: fully
-  local, on-device only, no accounts — same zero-friction stance as
-  `caffeinated`, revisited only with an explicit decision entry here.
-- **architecture.md — mostly still N/A.** No backend, no third-party API.
-  If Health Connect/HealthKit integration is added later, that's a local OS
-  API call, not a third-party network dependency — the "never call a
-  third-party API directly from the client" rule doesn't engage.
-- **stack.md — match framework to deployment shape.** One Flutter codebase,
-  two platform targets, no backend — a single deployable either way, same
-  reasoning as `caffeinated`, restated because this project is genuinely
-  cross-platform where the sibling deliberately isn't.
+Scaffold only. `lib/main.dart` is a placeholder screen that proves the palette
+and fonts load. No data model, no logging UI, no feature. `flutter analyze` and
+`flutter test` are clean. Launched and seen on the iOS simulator (iPhone 17 Pro,
+2026-09-20); **never run on Android**. One local commit, no remote, nothing
+pushed.
 
-## Cut list / open decisions (nothing built yet beyond scaffolding)
+## Hard rules
 
-- **Cross-platform support is the point this time**, not something dropped
-  — the opposite call from `caffeinated`, made for a specific reason (the
-  screen-awake feature has no iOS equivalent; a tracker has no such
-  platform-specific dependency).
-- Data model for logged drinks/doses, the caffeine half-life/remaining-level
-  math, and the actual tracking screens are not designed yet — this is
-  scaffolding only (project shell, git repo, shared identity/fonts wired
-  up, one placeholder screen proving the theme loads). The first real
-  feature is its own decision, to be made explicitly, not assumed from this
-  doc.
-- Health Connect / HealthKit sync — explicitly deferred, see above.
-- A home-screen widget showing current caffeine level — plausible given how
-  well the mug-fill metaphor from `caffeinated` could translate to "cup
-  filling toward your daily limit," not decided or started.
+- **v1 is local and account-free.** No cloud, no login, no PII collection. Any
+  change to that is a decision-lane entry in [product.md](product.md), not a
+  quiet addition.
+- **Any UI work follows [design.md](design.md).** No exceptions, no "just this
+  once."
+- **Scope is decided, not inherited.** A new feature gets its own
+  `features/<name>.md`, a line in [features/README.md](features/README.md), and
+  an explicit decision. The deferred list there exists so ideas aren't silently
+  built (or silently re-litigated).
+- **No Claude attribution anywhere in commits or PRs** — no author, co-author,
+  or "generated with" line. Commits are a single subject line, no body.
+  Reasoning goes in these docs. (Enforced globally by the workspace
+  `CLAUDE.md`; restated because this file is the durable memory and the repo
+  has its own git history.)
+- **Real naming pass before anything public.** See [product.md](product.md).
+
+## Process
+
+Tiered, per [`process.md`](../../rules/process.md):
+
+- **Fast lane:** typos, formatting, copy tweaks, small fixes, routine
+  implementation of something already decided. No doc update, no review.
+- **Decision lane:** a new dependency, a storage choice, a scope call, a UX
+  direction, anything annoying to reverse. Write it in the file for its concern
+  as part of the same unit of work, and do one honest adversarial pass — the
+  strongest reason it's wrong or premature. If nothing survives, say so; don't
+  invent an objection.
+- **Publish gate:** doc-sync before anything goes public (push, PR, release).
+  Nothing has been pushed, so nothing is owed yet.
+
+## Adaptation ledger (workspace rules → this project)
+
+What each library file contributed, what was dropped, and why.
+
+| Library file | Outcome |
+|---|---|
+| `process.md` | **Kept in full**, including the required `docs/` split (adopted 2026-09-20), tiered lanes, adversarial pass, one-line commits, scope discipline. |
+| `architecture.md` | **Mostly N/A, one rule engages.** No backend or third-party API, so client-call/failover/hosting-shape/hard-cap/fallback rules are dormant. "Keep reusable logic separate from where the data comes from" applies to the decay math — see [architecture.md](architecture.md). |
+| `stack.md` | **Kept/adapted:** framework-fits-deployment (one Flutter codebase, no backend), test the pure logic first, MIT, `master`. **Dropped:** the typed/untyped-language tradeoff (Dart is typed; no untyped external parsing yet) and the caching rule (no request path) — the storage question is open instead. See [stack.md](stack.md). |
+| `design.md` | **Kept in full**, with Flutter equivalents of the banned patterns and the new "reusing a device needs its own reason" check applied to the shared identity. See [design.md](design.md). |
+| `product.md` | **Kept.** Naming pass still owed; accounts/PII resolved as local-only for v1. See [product.md](product.md). |
+
+Known gap against the ledger: **no `LICENSE` file exists** although MIT is the
+stated default — see [stack.md](stack.md).
