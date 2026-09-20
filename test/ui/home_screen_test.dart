@@ -164,4 +164,133 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('0 drinks'), findsOneWidget);
   });
+
+  group('backdating', () {
+    testWidgets('a chip backdates the next log once, then resets to NOW', (
+      tester,
+    ) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('\u221230 MIN'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Espresso'));
+      await tester.pumpAndSettle();
+
+      final doses = await repo.all();
+      expect(doses, hasLength(2));
+      expect(doses[0].mg, 95);
+      expect(doses[0].at, now.subtract(const Duration(minutes: 30)).toUtc());
+      expect(doses[1].mg, 63);
+      expect(doses[1].at, now.toUtc(), reason: 'second tap is back to now');
+    });
+
+    testWidgets('backdated log says where it went and can be undone', (
+      tester,
+    ) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('\u22121 H'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      expect(find.text('Logged 95 mg at 1:30 PM.'), findsOneWidget);
+
+      await tester.tap(find.text('UNDO'));
+      await tester.pumpAndSettle();
+      expect(await repo.all(), isEmpty);
+    });
+
+    testWidgets('a plain now-log shows no bar', (tester) async {
+      await pumpApp(tester, InMemoryDoseRepository());
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('a dose that lands on yesterday says so', (tester) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo, clock: () => DateTime(2026, 9, 20, 1, 0));
+
+      await tester.tap(find.text('\u22122 H'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Logged 95 mg at 11:00 PM yesterday.'), findsOneWidget);
+      expect(find.text('Nothing yet today.'), findsOneWidget);
+      expect((await repo.all()).single.at, DateTime(2026, 9, 19, 23).toUtc());
+    });
+
+    testWidgets('choosing NOW again cancels a chip', (tester) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('\u22122 H'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('NOW'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+
+      expect((await repo.all()).single.at, now.toUtc());
+    });
+
+    testWidgets('PICK TIME opens a picker and applies the chosen time', (
+      tester,
+    ) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('PICK TIME'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK')); // accepts the initial time, 2:30 PM
+      await tester.pumpAndSettle();
+      expect(find.text('AT 2:30 PM'), findsOneWidget);
+
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      expect((await repo.all()).single.at, now.toUtc());
+      expect(find.text('PICK TIME'), findsOneWidget, reason: 'reset after log');
+    });
+
+    testWidgets('a chosen backdate is dropped when the app returns', (
+      tester,
+    ) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('\u22121 H'));
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      expect((await repo.all()).single.at, now.toUtc());
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('Other honours the chosen time too', (tester) async {
+      final repo = InMemoryDoseRepository();
+      await pumpApp(tester, repo);
+
+      await tester.tap(find.text('\u22121 H'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '150');
+      await tester.pump();
+      await tester.tap(find.text('LOG IT'));
+      await tester.pumpAndSettle();
+
+      final dose = (await repo.all()).single;
+      expect(dose.mg, 150);
+      expect(dose.at, now.subtract(const Duration(hours: 1)).toUtc());
+    });
+  });
 }

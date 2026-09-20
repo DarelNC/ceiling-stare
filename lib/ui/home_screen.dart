@@ -19,6 +19,70 @@ String _sourceLabel(DoseSource s) => switch (s) {
   DoseSource.custom => 'Other',
 };
 
+String _formatTime(BuildContext context, DateTime at) =>
+    MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(at.toLocal()),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+
+ThemeData _pickerTheme(ThemeData base) {
+  Color selected(Set<WidgetState> s, Color on, Color off) =>
+      s.contains(WidgetState.selected) ? on : off;
+  const edge = RoundedRectangleBorder(
+    side: BorderSide(color: Tokens.ink, width: 2),
+  );
+  return base.copyWith(
+    colorScheme: const ColorScheme.dark(
+      primary: Tokens.signal,
+      onPrimary: Tokens.ground,
+      surface: Tokens.ground,
+      onSurface: Tokens.ink,
+    ),
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: Tokens.ground,
+      shape: edge,
+      hourMinuteShape: edge,
+      dayPeriodShape: edge,
+      dayPeriodBorderSide: const BorderSide(color: Tokens.ink, width: 2),
+      hourMinuteColor: WidgetStateColor.resolveWith(
+        (s) => selected(s, Tokens.signal, Tokens.groundDeep),
+      ),
+      hourMinuteTextColor: WidgetStateColor.resolveWith(
+        (s) => selected(s, Tokens.ground, Tokens.ink),
+      ),
+      dayPeriodColor: WidgetStateColor.resolveWith(
+        (s) => selected(s, Tokens.signal, Colors.transparent),
+      ),
+      dayPeriodTextColor: WidgetStateColor.resolveWith(
+        (s) => selected(s, Tokens.ground, Tokens.ink),
+      ),
+      dialBackgroundColor: Tokens.groundDeep,
+      dialHandColor: Tokens.signal,
+      dialTextColor: WidgetStateColor.resolveWith(
+        (s) => selected(s, Tokens.ground, Tokens.ink),
+      ),
+      entryModeIconColor: Tokens.mutedInk,
+      helpTextStyle: const TextStyle(
+        fontFamily: Tokens.spaceGrotesk,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 2.2,
+        fontSize: 11,
+        color: Tokens.mutedInk,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: Tokens.signal,
+        shape: const RoundedRectangleBorder(),
+        textStyle: const TextStyle(
+          fontFamily: Tokens.spaceGrotesk,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+  );
+}
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.repository, required this.clock});
 
@@ -34,6 +98,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Object? _error;
   late DateTime _now;
   Timer? _timer;
+
+  // When the next dose happened. Both null means now. One-shot: cleared by
+  // every log so a stray backdate can't leak onto the next one-tap log.
+  Duration? _ago;
+  TimeOfDay? _picked;
 
   @override
   void initState() {
@@ -58,9 +127,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // Timers don't run while the app is suspended, so after hours in the
   // background "now" (and which day is "today") would be stale until the
   // next tick. Refresh the moment the app is back.
+  //
+  // A chosen backdate is dropped too: coming back an hour later to tap a drink
+  // means "now", and a stale "-1 h" would silently log it early.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _reload();
+    if (state != AppLifecycleState.resumed) return;
+    setState(() {
+      _ago = null;
+      _picked = null;
+    });
+    _reload();
   }
 
   Future<void> _reload() async {
@@ -87,20 +164,53 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await _reload();
   }
 
-  void _log(DoseSource source, int mg) {
-    HapticFeedback.lightImpact();
-    _add(Dose.create(source: source, mg: mg, at: widget.clock()));
+  DateTime _logTime() {
+    final now = widget.clock();
+    if (_ago != null) return now.subtract(_ago!);
+    if (_picked != null) {
+      return lastOccurrence(_picked!.hour, _picked!.minute, now);
+    }
+    return now;
   }
 
-  Future<void> _remove(Dose dose) async {
-    try {
-      await widget.repository.remove(dose.id);
-    } catch (e) {
-      if (mounted) setState(() => _error = e);
-      return;
+  Future<void> _log(DoseSource source, int mg) async {
+    HapticFeedback.lightImpact();
+    final backdated = _ago != null || _picked != null;
+    final dose = Dose.create(source: source, mg: mg, at: _logTime());
+    setState(() {
+      _ago = null;
+      _picked = null;
+    });
+    await _add(dose);
+    // A now-dose shows up in the log right under the finger. A backdated one
+    // may land off-screen or on yesterday, so say where it went and offer undo.
+    if (backdated && mounted && _error == null) {
+      final at = dose.at.toLocal();
+      final sameDay = dosesToday([dose], widget.clock()).isNotEmpty;
+      _showBar('Logged ${dose.mg} mg at ${_formatTime(context, at)}'
+          '${sameDay ? '' : ' yesterday'}.', () async {
+        await widget.repository.remove(dose.id);
+        await _reload();
+      });
     }
-    await _reload();
-    if (!mounted) return;
+  }
+
+  Future<void> _pickTime() async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(widget.clock()),
+      builder: (context, child) =>
+          Theme(data: _pickerTheme(Theme.of(context)), child: child!),
+    );
+    if (t != null && mounted) {
+      setState(() {
+        _picked = t;
+        _ago = null;
+      });
+    }
+  }
+
+  void _showBar(String message, Future<void> Function() onUndo) {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
@@ -111,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           shape: const RoundedRectangleBorder(),
           duration: const Duration(seconds: 4),
           content: Text(
-            'Removed ${dose.mg} mg.',
+            message,
             style: const TextStyle(
               fontFamily: Tokens.spaceGrotesk,
               fontWeight: FontWeight.w600,
@@ -121,10 +231,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           action: SnackBarAction(
             label: 'UNDO',
             textColor: Tokens.ground,
-            onPressed: () => _add(dose),
+            onPressed: () async {
+              try {
+                await onUndo();
+              } catch (e) {
+                if (mounted) setState(() => _error = e);
+              }
+            },
           ),
         ),
       );
+  }
+
+  Future<void> _remove(Dose dose) async {
+    try {
+      await widget.repository.remove(dose.id);
+    } catch (e) {
+      if (mounted) setState(() => _error = e);
+      return;
+    }
+    await _reload();
+    if (mounted) _showBar('Removed ${dose.mg} mg.', () => _add(dose));
   }
 
   Future<void> _other() async {
@@ -187,6 +314,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
               const SizedBox(height: 14),
+              _WhenRow(
+                ago: _ago,
+                picked: _picked,
+                onNow: () => setState(() {
+                  _ago = null;
+                  _picked = null;
+                }),
+                onAgo: (d) => setState(() {
+                  _ago = d;
+                  _picked = null;
+                }),
+                onPick: _pickTime,
+              ),
+              const SizedBox(height: 18),
               _PresetGrid(
                 onPreset: (p) => _log(p.source, p.mg),
                 onOther: _other,
@@ -327,6 +468,86 @@ class _TodayLine extends StatelessWidget {
   }
 }
 
+/// One-shot "when did you have it" control. Defaults to NOW, so the common
+/// case stays a single tap on a drink.
+class _WhenRow extends StatelessWidget {
+  const _WhenRow({
+    required this.ago,
+    required this.picked,
+    required this.onNow,
+    required this.onAgo,
+    required this.onPick,
+  });
+
+  final Duration? ago;
+  final TimeOfDay? picked;
+  final VoidCallback onNow;
+  final void Function(Duration) onAgo;
+  final VoidCallback onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(
+      String label,
+      bool selected,
+      VoidCallback onTap, {
+      String? spoken,
+    }) => Semantics(
+      button: true,
+      selected: selected,
+      label: spoken ?? label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 90),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? Tokens.signal : Colors.transparent,
+            border: Border.all(
+              color: selected ? Tokens.signal : Tokens.dim,
+              width: 2,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: Tokens.spaceGrotesk,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              letterSpacing: 0.8,
+              color: selected ? Tokens.ground : Tokens.ink,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final steps = [
+      (const Duration(minutes: 30), '\u221230 MIN', '30 minutes ago'),
+      (const Duration(hours: 1), '\u22121 H', '1 hour ago'),
+      (const Duration(hours: 2), '\u22122 H', '2 hours ago'),
+    ];
+    return Wrap(
+      spacing: 7,
+      runSpacing: 8,
+      children: [
+        chip('NOW', ago == null && picked == null, onNow),
+        for (final (d, label, spoken) in steps)
+          chip(label, ago == d, () => onAgo(d), spoken: spoken),
+        chip(
+          picked == null
+              ? 'PICK TIME'
+              : 'AT ${_formatTime(context, DateTime(2000, 1, 1, picked!.hour, picked!.minute))}',
+          picked != null,
+          onPick,
+        ),
+      ],
+    );
+  }
+}
+
 class _PresetGrid extends StatelessWidget {
   const _PresetGrid({required this.onPreset, required this.onOther});
 
@@ -413,10 +634,7 @@ class _DoseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final time = MaterialLocalizations.of(context).formatTimeOfDay(
-      TimeOfDay.fromDateTime(dose.at.toLocal()),
-      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-    );
+    final time = _formatTime(context, dose.at);
     return Container(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Tokens.rust)),
