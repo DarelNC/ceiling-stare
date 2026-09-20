@@ -42,3 +42,8 @@ No storage, UI, or platform imports, and no knowledge of where a dose came from.
   takes `Iterable<Dose>` and a `now`, imports only the `Dose` data class, and
   never touches the repository. Half-life is a parameter with a 5-hour default;
   see [features/decay-math.md](features/decay-math.md).
+- **Screens read one shared `DoseLog`** (`lib/state/dose_log.dart`), a
+  `ChangeNotifier` over the repository. Screens never hold their own copy of
+  the log or talk to the repository directly, and the pure functions in
+  `lib/domain/` (decay, today, history) take plain `Dose` lists from it. See
+  [features/history.md](features/history.md).

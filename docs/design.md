@@ -68,11 +68,18 @@ body. Major Mono Display for readouts only: mug scale marks, the `MG` unit,
 log-row times and amounts, plus the `WIRED` wordmark. DM Serif italic for the
 one human line (the empty state).
 
-**Flat secondary controls.** The when-chips have a border but no hard shadow;
+**Flat secondary controls.** The when-chips, MENU and BACK have a border but no hard shadow;
 the raised-with-shadow treatment is reserved for the primary action (drink
 buttons, LOG IT). The Material time picker is themed to the identity in
 `_pickerTheme` (`home_screen.dart`): hard ink borders, zero radius, signal
 selection.
+
+**Menu and history.** The menu is a bordered panel with a hard rust shadow,
+numbered entries in Major Mono and labels in Archivo Black, dropped from the top
+right over a dimmed ground. The history trend strip reuses the mug's semantics:
+signal-yellow bars, alert orange past the 400 mg reference, the reference in a
+left gutter in Major Mono. Day sections are separated by a 2 px ink rule under
+each day header and 1 px rust rules between doses.
 
 ## Why reuse this identity: the reuse check
 
@@ -116,6 +123,11 @@ were assigned for a screen-awake utility.
   hard to read, and it was exactly the general "techy signal" use the reuse
   check rules out. Replaced by Space Grotesk bold caps with letter-spacing, which
   is also what `caffeinated` uses for labels.
+- **Today's log on the home screen.** Built first, then moved to the history
+  screen: with the chip row it sat under the fold, and the home screen was
+  carrying too many features. Every log now raises an undo bar instead.
+- **Reference mark behind the chart bars.** The "400" label was drawn under the
+  bars and disappeared under an over-limit day; moved to a left gutter.
 - **Chip labels "30 MIN AGO" etc.** Wrapped the row onto two lines at phone
   width; shortened to "−30 MIN" with the long form for screen readers.
 - **Material's default snackbar shadow.** Soft blur shadow broke the hard-shadow

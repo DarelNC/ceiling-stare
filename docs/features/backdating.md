@@ -27,16 +27,16 @@ adversarial pass).
 
 `lastOccurrence(hour, minute, now)`: today if that time has already happened,
 otherwise yesterday. Logging "11 pm" at 12:30 am lands on the previous evening
-instead of in the future. It therefore covers the last 24 hours and no more. A
-dose from before that needs a history view, which doesn't exist yet
-([README.md](README.md)).
+instead of in the future. It therefore covers the last 24 hours and no more. Anything
+older isn't loggable; there is no editing of past days beyond removing a dose in
+the [history](history.md).
 
-### A backdated log says where it went, with undo
+### A backdated log says when and where it went, with undo
 
-A now-log appears in today's log right under the thumb. A backdated one may land
-below the fold, or on yesterday, where no screen shows it yet. So only backdated
-logs raise a bar: "Logged 95 mg at 05:07." (with "yesterday" when it crossed
-midnight) and an UNDO that removes exactly that dose. Now-logs stay silent.
+Every log raises a bar with UNDO (see [history.md](history.md)); a backdated one
+also names the time, and "yesterday" when it crossed midnight: "Logged 95 mg at
+11:00 PM yesterday." The bar exists because the log isn't on the home screen. A
+dose on yesterday can be found and removed later in the history view.
 
 ### Compact labels
 
@@ -63,13 +63,8 @@ accepted residual, because the app is visibly in that state.
 ## Known limits
 
 - **24 hours back at most.** See above.
-- **A dose on yesterday isn't visible anywhere afterwards.** It counts toward the
-  readout while it's still active, and the bar's UNDO works for a few seconds,
-  but there is no way to find and remove it later until the history view exists.
-- **The log is now mostly below the fold.** With the chip row added, today's log
-  starts at the bottom edge of an iPhone 17 Pro. The mug, readout and total all
-  update immediately, so a tap is never silent, but a screen that leads with the
-  log would need this row rethought.
+- **A dose on yesterday shows up only in the history view**, not on the home
+  screen. It still counts toward the mug while it's active.
 
 ## Tests
 

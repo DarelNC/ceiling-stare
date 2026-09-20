@@ -11,7 +11,9 @@ One file per feature, created when that feature is actually decided:
 - [decay-math.md](decay-math.md) — `remainingMg`: estimated caffeine still
   active, a pure function over doses.
 - [core-screen.md](core-screen.md) — the single screen: mug, active and today
-  readouts, one-tap presets, Other, today's log with undo.
+  readouts, one-tap presets, Other, undo on every log.
+- [history.md](history.md) — the menu, and a history screen: 14-day trend strip
+  plus every dose grouped by day, with removal. Today's log moved here from home.
 - [backdating.md](backdating.md) — log a dose at an earlier time: −30 MIN, −1 H,
   −2 H chips or a picked time of day.
 
@@ -36,7 +38,7 @@ explicitly when it's reached, not a commitment.
 
 - **Verify preset values** against a cited source, and decide whether the log
   should remember the drink name (model change).
-4. Daily/weekly history view: trend over time, not just today.
+4. ~~History view~~ **Done**, see [history.md](history.md).
 5. Safe-to-sleep nudge from remaining level against a bedtime. Wording is a
    product decision; see health-claim framing in [../product.md](../product.md).
 6. Local notifications ("near your limit", "safe to sleep now"). First real

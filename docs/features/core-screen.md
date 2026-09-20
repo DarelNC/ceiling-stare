@@ -5,12 +5,14 @@ Code in `lib/ui/`, `lib/domain/today.dart`, `lib/domain/presets.dart`.
 
 ## What it does
 
-One screen. Top: a mug whose liquid is the caffeine still active, with the
+The home screen. Top: a mug whose liquid is the caffeine still active, with the
 number beside it and a caption saying it's an estimate. Then today's total and
 drink count. Then six buttons: five presets and Other. Tapping a preset logs it
 at the current time in one tap. Other opens a sheet for a whole-mg entry
-(1 to 1000). Below, today's log, newest first, each row removable with an undo
-bar. The estimate refreshes every 30 seconds and on returning to the foreground.
+(1 to 1000). Every log raises a bar with UNDO. A MENU button in the header and a
+SEE LOG link on the today line lead to [history.md](history.md), where the log
+itself lives. The estimate refreshes every 30 seconds and on returning to the
+foreground.
 
 ## Decisions
 
@@ -54,7 +56,7 @@ disagree in a way that matters.
 Above 1000 is almost certainly a typo, and one wrong number skews every later
 readout. Logged as `DoseSource.custom`.
 
-### Removal is immediate with undo, not confirm-first
+### Removal is immediate with undo, not confirm-first (now on the history screen)
 
 A confirm dialog on every removal punishes the common case. Undo (4 seconds)
 re-adds the identical dose, same id and time.
@@ -90,10 +92,8 @@ a product decision under [../product.md](../product.md), not a UI detail.
 - **Backdating is a separate feature**, see [backdating.md](backdating.md).
 - **The log row shows the source, not the drink.** An espresso reads "Coffee"
   because `Dose` stores only the source. A name field is a model change,
-  decided with the history view.
+  decided when that's wanted; the history view shows the source too.
 - **iOS only verified.** Android has never been run.
-- **The list is below the fold** on a short phone once there are several doses;
-  the mug and total update immediately, so a tap is never silent.
 
 ## Tests
 

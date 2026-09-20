@@ -41,9 +41,9 @@ Highest-value target: the caffeine-remaining math, since it is pure and
 source-agnostic ([architecture.md](architecture.md)). Written test first, with
 independently hand-computed expected values. Also covered: the model and
 repository (including corrupt data and concurrent writes), the today/preset
-logic, the mug, and the home screen through widget tests with an in-memory
-repository (`test/support/`). Widget tests use a fixed clock injected into
-`WiredApp`.
+and history logic, the shared `DoseLog`, and the screens through widget
+tests with an in-memory repository (`test/support/`). Widget tests use a fixed
+clock injected into `WiredApp`.
 
 **Verification:** `flutter analyze` and `flutter test` are clean, and the
 app was built (`flutter build ios --simulator --debug`) and exercised on the
