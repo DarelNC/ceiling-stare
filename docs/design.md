@@ -68,6 +68,12 @@ body. Major Mono Display for readouts only: mug scale marks, the `MG` unit,
 log-row times and amounts, plus the `WIRED` wordmark. DM Serif italic for the
 one human line (the empty state).
 
+**Flat secondary controls.** The when-chips have a border but no hard shadow;
+the raised-with-shadow treatment is reserved for the primary action (drink
+buttons, LOG IT). The Material time picker is themed to the identity in
+`_pickerTheme` (`home_screen.dart`): hard ink borders, zero radius, signal
+selection.
+
 ## Why reuse this identity: the reuse check
 
 `rules/design.md` says a device that worked on a previous project needs its own
@@ -110,6 +116,8 @@ were assigned for a screen-awake utility.
   hard to read, and it was exactly the general "techy signal" use the reuse
   check rules out. Replaced by Space Grotesk bold caps with letter-spacing, which
   is also what `caffeinated` uses for labels.
+- **Chip labels "30 MIN AGO" etc.** Wrapped the row onto two lines at phone
+  width; shortened to "−30 MIN" with the long form for screen readers.
 - **Material's default snackbar shadow.** Soft blur shadow broke the hard-shadow
   rule; elevation set to 0 (flat ink bar, zero radius).
 - **No alternative to the mug was built.** The brief was to try the mug first,

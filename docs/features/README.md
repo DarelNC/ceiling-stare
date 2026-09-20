@@ -12,6 +12,8 @@ One file per feature, created when that feature is actually decided:
   active, a pure function over doses.
 - [core-screen.md](core-screen.md) — the single screen: mug, active and today
   readouts, one-tap presets, Other, today's log with undo.
+- [backdating.md](backdating.md) — log a dose at an earlier time: −30 MIN, −1 H,
+  −2 H chips or a picked time of day.
 
 ## Backlog, in order
 
@@ -32,9 +34,6 @@ explicitly when it's reached, not a commitment.
 
 **Soon after**
 
-- **Log with a time (backdating).** Every log is "now" today. Likely the first
-  real usability gap. Needs a time control on the log action without costing
-  the one-tap path.
 - **Verify preset values** against a cited source, and decide whether the log
   should remember the drink name (model change).
 4. Daily/weekly history view: trend over time, not just today.

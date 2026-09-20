@@ -87,9 +87,7 @@ a product decision under [../product.md](../product.md), not a UI detail.
 
 ## Known limits (deliberate, not bugs)
 
-- **No backdating.** Every log is "now". "I had a coffee an hour ago" needs a
-  time picker on the log action; it is the most likely next request and is
-  listed in [README.md](README.md).
+- **Backdating is a separate feature**, see [backdating.md](backdating.md).
 - **The log row shows the source, not the drink.** An espresso reads "Coffee"
   because `Dose` stores only the source. A name field is a model change,
   decided with the history view.

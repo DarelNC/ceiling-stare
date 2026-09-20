@@ -31,9 +31,10 @@ are read on demand.
 v1 core loop is built: log a dose in one tap (five bundled presets, or a
 hand-entered amount), see today's total and an estimate of caffeine still
 active as a draining mug, remove with undo. All local, no accounts. Details in
-[features/](features/README.md). `flutter analyze` is clean and 51 tests pass.
+[features/](features/README.md). `flutter analyze` is clean and 66 tests pass.
 Run and seen on the iOS simulator (iPhone 17 Pro, 2026-09-20); **never run on
-Android**. Not yet built: backdating, history, notifications, safe-to-sleep.
+Android**. Logging can be backdated up to 24 hours. Not yet built: history,
+notifications, safe-to-sleep.
 
 ## Hard rules
 
