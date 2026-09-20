@@ -15,8 +15,9 @@ void main() {
     WidgetTester tester,
     dynamic repo, {
     DateTime Function()? clock,
+    double height = 874,
   }) async {
-    tester.view.physicalSize = const Size(402 * 3, 874 * 3);
+    tester.view.physicalSize = Size(402 * 3, height * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -30,7 +31,13 @@ void main() {
   ) async {
     await pumpApp(tester, InMemoryDoseRepository());
     expect(find.text('WIRED'), findsOneWidget);
-    expect(find.text('Nothing yet today.'), findsOneWidget);
+    expect(find.text('MENU'), findsOneWidget);
+    expect(find.text('SEE LOG'), findsOneWidget);
+    expect(
+      find.text("TODAY'S LOG"),
+      findsNothing,
+      reason: 'the log lives on the history screen',
+    );
     expect(find.text('0 drinks'), findsOneWidget);
     for (final name in [
       'Espresso',
@@ -59,28 +66,27 @@ void main() {
     expect(doses.single.source, DoseSource.coffee);
     expect(doses.single.at, now.toUtc());
     expect(find.text('1 drink'), findsOneWidget);
-    expect(find.text('95 MG'), findsNWidgets(2)); // today line + log row
+    expect(find.text('95 MG'), findsOneWidget); // today line
     expect(find.text('95'), findsOneWidget); // active readout, fresh dose
-    expect(find.text('Nothing yet today.'), findsNothing);
+    expect(find.text('Logged 95 mg.'), findsOneWidget);
   });
 
-  testWidgets('remove deletes the dose and undo puts it back', (tester) async {
-    final semantics = tester.ensureSemantics();
+  testWidgets('every log says what it did, and undo takes it back', (
+    tester,
+  ) async {
     final repo = InMemoryDoseRepository();
     await pumpApp(tester, repo);
+
     await tester.tap(find.text('Espresso'));
     await tester.pumpAndSettle();
-
-    final remove = find.bySemanticsLabel('Remove 63 mg dose');
-    await tester.tap(remove);
-    await tester.pumpAndSettle();
-    expect(await repo.all(), isEmpty);
-    expect(find.text('Removed 63 mg.'), findsOneWidget);
+    expect(find.text('Logged 63 mg.'), findsOneWidget);
+    expect(await repo.all(), hasLength(1));
 
     await tester.tap(find.text('UNDO'));
     await tester.pumpAndSettle();
-    expect((await repo.all()).single.mg, 63);
-    semantics.dispose();
+    expect(await repo.all(), isEmpty);
+    expect(find.text('0 drinks'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget); // readout back to zero
   });
 
   testWidgets('Other only accepts 1 to 1000 mg', (tester) async {
@@ -128,7 +134,7 @@ void main() {
       final expected = (200 * pow(0.5, 16.5 / 5)).round();
       expect(find.text('$expected'), findsOneWidget);
       expect(find.text('0 drinks'), findsOneWidget);
-      expect(find.text('Nothing yet today.'), findsOneWidget);
+      expect(find.text('0 MG'), findsOneWidget, reason: "not in today's total");
     },
   );
 
@@ -204,11 +210,11 @@ void main() {
       expect(await repo.all(), isEmpty);
     });
 
-    testWidgets('a plain now-log shows no bar', (tester) async {
+    testWidgets('a now-log names no time', (tester) async {
       await pumpApp(tester, InMemoryDoseRepository());
       await tester.tap(find.text('Coffee'));
       await tester.pumpAndSettle();
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Logged 95 mg.'), findsOneWidget);
     });
 
     testWidgets('a dose that lands on yesterday says so', (tester) async {
@@ -221,7 +227,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Logged 95 mg at 11:00 PM yesterday.'), findsOneWidget);
-      expect(find.text('Nothing yet today.'), findsOneWidget);
+      expect(find.text('0 drinks'), findsOneWidget);
       expect((await repo.all()).single.at, DateTime(2026, 9, 19, 23).toUtc());
     });
 
@@ -272,7 +278,11 @@ void main() {
       await tester.tap(find.text('Coffee'));
       await tester.pumpAndSettle();
       expect((await repo.all()).single.at, now.toUtc());
-      expect(find.byType(SnackBar), findsNothing);
+      expect(
+        find.text('Logged 95 mg.'),
+        findsOneWidget,
+        reason: 'no time named',
+      );
     });
 
     testWidgets('Other honours the chosen time too', (tester) async {

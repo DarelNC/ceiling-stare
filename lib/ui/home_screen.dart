@@ -4,26 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/dose.dart';
-import '../data/dose_repository.dart';
 import '../domain/caffeine.dart';
 import '../domain/presets.dart';
 import '../domain/today.dart';
+import '../state/dose_log.dart';
 import 'hard_button.dart';
+import 'history_screen.dart';
+import 'menu.dart';
 import 'mug.dart';
+import 'shared.dart';
 import 'tokens.dart';
-
-String _sourceLabel(DoseSource s) => switch (s) {
-  DoseSource.coffee => 'Coffee',
-  DoseSource.tea => 'Tea',
-  DoseSource.energyDrink => 'Energy drink',
-  DoseSource.custom => 'Other',
-};
-
-String _formatTime(BuildContext context, DateTime at) =>
-    MaterialLocalizations.of(context).formatTimeOfDay(
-      TimeOfDay.fromDateTime(at.toLocal()),
-      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-    );
 
 ThemeData _pickerTheme(ThemeData base) {
   Color selected(Set<WidgetState> s, Color on, Color off) =>
@@ -84,19 +74,15 @@ ThemeData _pickerTheme(ThemeData base) {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.repository, required this.clock});
+  const HomeScreen({super.key, required this.log});
 
-  final DoseRepository repository;
-  final DateTime Function() clock;
+  final DoseLog log;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  List<Dose> _doses = const [];
-  Object? _error;
-  late DateTime _now;
   Timer? _timer;
 
   // When the next dose happened. Both null means now. One-shot: cleared by
@@ -104,17 +90,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Duration? _ago;
   TimeOfDay? _picked;
 
+  DoseLog get _log => widget.log;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _now = widget.clock();
-    _reload();
+    _log.load();
     // The estimate drifts with the clock even when nothing is logged.
-    _timer = Timer.periodic(
-      const Duration(seconds: 30),
-      (_) => setState(() => _now = widget.clock()),
-    );
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _log.tick());
   }
 
   @override
@@ -137,35 +121,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _ago = null;
       _picked = null;
     });
-    _reload();
-  }
-
-  Future<void> _reload() async {
-    try {
-      final doses = await widget.repository.all();
-      if (!mounted) return;
-      setState(() {
-        _doses = doses;
-        _error = null;
-        _now = widget.clock();
-      });
-    } catch (e) {
-      if (mounted) setState(() => _error = e);
-    }
-  }
-
-  Future<void> _add(Dose dose) async {
-    try {
-      await widget.repository.add(dose);
-    } catch (e) {
-      if (mounted) setState(() => _error = e);
-      return;
-    }
-    await _reload();
+    _log.load();
   }
 
   DateTime _logTime() {
-    final now = widget.clock();
+    final now = _log.clock();
     if (_ago != null) return now.subtract(_ago!);
     if (_picked != null) {
       return lastOccurrence(_picked!.hour, _picked!.minute, now);
@@ -173,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return now;
   }
 
-  Future<void> _log(DoseSource source, int mg) async {
+  Future<void> _logDose(DoseSource source, int mg) async {
     HapticFeedback.lightImpact();
     final backdated = _ago != null || _picked != null;
     final dose = Dose.create(source: source, mg: mg, at: _logTime());
@@ -181,24 +141,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _ago = null;
       _picked = null;
     });
-    await _add(dose);
-    // A now-dose shows up in the log right under the finger. A backdated one
-    // may land off-screen or on yesterday, so say where it went and offer undo.
-    if (backdated && mounted && _error == null) {
-      final at = dose.at.toLocal();
-      final sameDay = dosesToday([dose], widget.clock()).isNotEmpty;
-      _showBar('Logged ${dose.mg} mg at ${_formatTime(context, at)}'
-          '${sameDay ? '' : ' yesterday'}.', () async {
-        await widget.repository.remove(dose.id);
-        await _reload();
-      });
+    if (!await _log.add(dose) || !mounted) return;
+    // The log isn't on this screen, so every log says what it did and offers
+    // undo. A backdated one also says when, and whether that was yesterday.
+    var when = '';
+    if (backdated) {
+      final sameDay = dosesToday([dose], _log.clock()).isNotEmpty;
+      when =
+          ' at ${formatTime(context, dose.at)}${sameDay ? '' : ' yesterday'}';
     }
+    showUndoBar(context, 'Logged ${dose.mg} mg$when.', () async {
+      await _log.remove(dose);
+    });
   }
 
   Future<void> _pickTime() async {
     final t = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(widget.clock()),
+      initialTime: TimeOfDay.fromDateTime(_log.clock()),
       builder: (context, child) =>
           Theme(data: _pickerTheme(Theme.of(context)), child: child!),
     );
@@ -208,50 +168,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _ago = null;
       });
     }
-  }
-
-  void _showBar(String message, Future<void> Function() onUndo) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          backgroundColor: Tokens.ink,
-          behavior: SnackBarBehavior.floating,
-          elevation: 0,
-          shape: const RoundedRectangleBorder(),
-          duration: const Duration(seconds: 4),
-          content: Text(
-            message,
-            style: const TextStyle(
-              fontFamily: Tokens.spaceGrotesk,
-              fontWeight: FontWeight.w600,
-              color: Tokens.ground,
-            ),
-          ),
-          action: SnackBarAction(
-            label: 'UNDO',
-            textColor: Tokens.ground,
-            onPressed: () async {
-              try {
-                await onUndo();
-              } catch (e) {
-                if (mounted) setState(() => _error = e);
-              }
-            },
-          ),
-        ),
-      );
-  }
-
-  Future<void> _remove(Dose dose) async {
-    try {
-      await widget.repository.remove(dose.id);
-    } catch (e) {
-      if (mounted) setState(() => _error = e);
-      return;
-    }
-    await _reload();
-    if (mounted) _showBar('Removed ${dose.mg} mg.', () => _add(dose));
   }
 
   Future<void> _other() async {
@@ -264,116 +180,104 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       builder: (_) => const _OtherSheet(),
     );
-    if (mg != null) _log(DoseSource.custom, mg);
+    if (mg != null) _logDose(DoseSource.custom, mg);
+  }
+
+  Future<void> _openHistory() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => HistoryScreen(log: _log)));
+
+  Future<void> _openMenu() async {
+    final choice = await showAppMenu(context);
+    if (choice == MenuDestination.history && mounted) await _openHistory();
   }
 
   @override
   Widget build(BuildContext context) {
-    final today = dosesToday(_doses, _now);
-    final active = remainingMg(_doses, _now);
-
     return Scaffold(
       backgroundColor: Tokens.ground,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(22, 18, 22, 40),
-          children: [
-            const Text(
-              'WIRED',
-              style: TextStyle(
-                fontFamily: Tokens.majorMono,
-                color: Tokens.ink,
-                fontSize: 13,
-                letterSpacing: 3,
-              ),
-            ),
-            const SizedBox(height: 26),
-            if (_error != null)
-              _ErrorBlock(error: _error!)
-            else ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Mug(activeMg: active),
-                  const SizedBox(width: 8),
-                  Expanded(child: _Readout(activeMg: active)),
-                ],
-              ),
-              const SizedBox(height: 26),
-              _TodayLine(count: today.length, mg: totalMg(today)),
-              const SizedBox(height: 30),
-              const _Label('TAP TO LOG'),
-              const SizedBox(height: 6),
-              const Text(
-                'Typical amounts. Other takes the real number.',
-                style: TextStyle(
-                  fontFamily: Tokens.spaceGrotesk,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  color: Tokens.dim,
+        child: ListenableBuilder(
+          listenable: _log,
+          builder: (context, _) {
+            final now = _log.now;
+            final today = dosesToday(_log.doses, now);
+            final active = remainingMg(_log.doses, now);
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 40),
+              children: [
+                Row(
+                  children: [
+                    const Text(
+                      'WIRED',
+                      style: TextStyle(
+                        fontFamily: Tokens.majorMono,
+                        color: Tokens.ink,
+                        fontSize: 13,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                    const Spacer(),
+                    MenuButton(onTap: _openMenu),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 14),
-              _WhenRow(
-                ago: _ago,
-                picked: _picked,
-                onNow: () => setState(() {
-                  _ago = null;
-                  _picked = null;
-                }),
-                onAgo: (d) => setState(() {
-                  _ago = d;
-                  _picked = null;
-                }),
-                onPick: _pickTime,
-              ),
-              const SizedBox(height: 18),
-              _PresetGrid(
-                onPreset: (p) => _log(p.source, p.mg),
-                onOther: _other,
-              ),
-              const SizedBox(height: 34),
-              const _Label("TODAY'S LOG"),
-              const SizedBox(height: 10),
-              if (today.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Text(
-                    'Nothing yet today.',
+                const SizedBox(height: 26),
+                if (_log.error != null)
+                  ErrorBlock(error: _log.error!)
+                else ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Mug(activeMg: active),
+                      const SizedBox(width: 8),
+                      Expanded(child: _Readout(activeMg: active)),
+                    ],
+                  ),
+                  const SizedBox(height: 26),
+                  _TodayLine(
+                    count: today.length,
+                    mg: totalMg(today),
+                    onSeeLog: _openHistory,
+                  ),
+                  const SizedBox(height: 30),
+                  const Label('TAP TO LOG'),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Typical amounts. Other takes the real number.',
                     style: TextStyle(
-                      fontFamily: Tokens.dmSerifItalic,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 22,
-                      color: Tokens.mutedInk,
+                      fontFamily: Tokens.spaceGrotesk,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                      color: Tokens.dim,
                     ),
                   ),
-                )
-              else
-                for (final d in today)
-                  _DoseRow(dose: d, onRemove: () => _remove(d)),
-            ],
-          ],
+                  const SizedBox(height: 14),
+                  _WhenRow(
+                    ago: _ago,
+                    picked: _picked,
+                    onNow: () => setState(() {
+                      _ago = null;
+                      _picked = null;
+                    }),
+                    onAgo: (d) => setState(() {
+                      _ago = d;
+                      _picked = null;
+                    }),
+                    onPick: _pickTime,
+                  ),
+                  const SizedBox(height: 18),
+                  _PresetGrid(
+                    onPreset: (p) => _logDose(p.source, p.mg),
+                    onOther: _other,
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
-}
-
-class _Label extends StatelessWidget {
-  const _Label(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    text,
-    style: const TextStyle(
-      fontFamily: Tokens.spaceGrotesk,
-      fontWeight: FontWeight.w700,
-      fontSize: 11,
-      letterSpacing: 2.2,
-      color: Tokens.mutedInk,
-    ),
-  );
 }
 
 class _Readout extends StatelessWidget {
@@ -385,7 +289,7 @@ class _Readout extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _Label('STILL ACTIVE'),
+        const Label('STILL ACTIVE'),
         const SizedBox(height: 8),
         TweenAnimationBuilder<double>(
           tween: Tween(end: activeMg),
@@ -433,9 +337,14 @@ class _Readout extends StatelessWidget {
 }
 
 class _TodayLine extends StatelessWidget {
-  const _TodayLine({required this.count, required this.mg});
+  const _TodayLine({
+    required this.count,
+    required this.mg,
+    required this.onSeeLog,
+  });
   final int count;
   final int mg;
+  final VoidCallback onSeeLog;
 
   @override
   Widget build(BuildContext context) {
@@ -443,24 +352,64 @@ class _TodayLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        const _Label('TODAY'),
-        const SizedBox(width: 14),
-        Text(
-          '$mg MG',
-          style: const TextStyle(
-            fontFamily: Tokens.archivoBlack,
-            fontSize: 26,
-            color: Tokens.ink,
+        // The totals shrink to fit rather than overflow, so a big number or a
+        // large text setting can't push SEE LOG off the screen.
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                const Label('TODAY'),
+                const SizedBox(width: 14),
+                Text(
+                  '$mg MG',
+                  style: const TextStyle(
+                    fontFamily: Tokens.archivoBlack,
+                    fontSize: 26,
+                    color: Tokens.ink,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  count == 1 ? '1 drink' : '$count drinks',
+                  style: const TextStyle(
+                    fontFamily: Tokens.spaceGrotesk,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                    color: Tokens.dim,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          count == 1 ? '1 drink' : '$count drinks',
-          style: const TextStyle(
-            fontFamily: Tokens.spaceGrotesk,
-            fontWeight: FontWeight.w500,
-            fontSize: 13,
-            color: Tokens.dim,
+        Semantics(
+          button: true,
+          label: 'See the log',
+          excludeSemantics: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onSeeLog,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+              child: Text(
+                'SEE LOG',
+                style: TextStyle(
+                  fontFamily: Tokens.spaceGrotesk,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                  letterSpacing: 1.6,
+                  color: Tokens.signal,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Tokens.signal,
+                  decorationThickness: 2,
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -468,8 +417,6 @@ class _TodayLine extends StatelessWidget {
   }
 }
 
-/// One-shot "when did you have it" control. Defaults to NOW, so the common
-/// case stays a single tap on a drink.
 class _WhenRow extends StatelessWidget {
   const _WhenRow({
     required this.ago,
@@ -539,7 +486,7 @@ class _WhenRow extends StatelessWidget {
         chip(
           picked == null
               ? 'PICK TIME'
-              : 'AT ${_formatTime(context, DateTime(2000, 1, 1, picked!.hour, picked!.minute))}',
+              : 'AT ${formatTime(context, DateTime(2000, 1, 1, picked!.hour, picked!.minute))}',
           picked != null,
           onPick,
         ),
@@ -627,132 +574,6 @@ class _CellText extends StatelessWidget {
   );
 }
 
-class _DoseRow extends StatelessWidget {
-  const _DoseRow({required this.dose, required this.onRemove});
-  final Dose dose;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final time = _formatTime(context, dose.at);
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Tokens.rust)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 92,
-            child: Text(
-              time,
-              style: const TextStyle(
-                fontFamily: Tokens.majorMono,
-                fontSize: 13,
-                color: Tokens.mutedInk,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              _sourceLabel(dose.source),
-              style: const TextStyle(
-                fontFamily: Tokens.spaceGrotesk,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: Tokens.ink,
-              ),
-            ),
-          ),
-          Text(
-            '${dose.mg} MG',
-            style: const TextStyle(
-              fontFamily: Tokens.majorMono,
-              fontSize: 13,
-              color: Tokens.ink,
-            ),
-          ),
-          Semantics(
-            container: true,
-            button: true,
-            label: 'Remove ${dose.mg} mg dose',
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onRemove,
-              child: const SizedBox(
-                width: 52,
-                height: 52,
-                child: Center(child: _Cross()),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Two square-capped strokes; no icon font.
-class _Cross extends StatelessWidget {
-  const _Cross();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget bar(double angle) => Transform.rotate(
-      angle: angle,
-      child: Container(width: 16, height: 2.5, color: Tokens.mutedInk),
-    );
-    return SizedBox(
-      width: 16,
-      height: 16,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [bar(0.7853981634), bar(-0.7853981634)],
-      ),
-    );
-  }
-}
-
-class _ErrorBlock extends StatelessWidget {
-  const _ErrorBlock({required this.error});
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        "CAN'T READ\nTHE SAVED LOG",
-        style: TextStyle(
-          fontFamily: Tokens.archivoBlack,
-          fontSize: 34,
-          height: 0.95,
-          color: Tokens.ink,
-          shadows: [Shadow(color: Tokens.rust, offset: Offset(4, 4))],
-        ),
-      ),
-      const SizedBox(height: 14),
-      const Text(
-        'Nothing was changed or deleted. Logging is paused so the stored data '
-        'is not overwritten.',
-        style: TextStyle(
-          fontFamily: Tokens.spaceGrotesk,
-          fontSize: 15,
-          color: Tokens.mutedInk,
-        ),
-      ),
-      const SizedBox(height: 12),
-      Text(
-        '$error',
-        style: const TextStyle(
-          fontFamily: Tokens.spaceGrotesk,
-          fontSize: 12,
-          color: Tokens.dim,
-        ),
-      ),
-    ],
-  );
-}
-
 class _OtherSheet extends StatefulWidget {
   const _OtherSheet();
 
@@ -787,7 +608,7 @@ class _OtherSheetState extends State<_OtherSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _Label('OTHER'),
+          const Label('OTHER'),
           const SizedBox(height: 10),
           TextField(
             controller: _controller,
