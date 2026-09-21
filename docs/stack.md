@@ -43,7 +43,7 @@ independently hand-computed expected values. Also covered: the model and
 repository (including corrupt data and concurrent writes), the today/preset
 and history logic, the shared `DoseLog`, and the screens through widget
 tests with an in-memory repository (`test/support/`). Widget tests use a fixed
-clock injected into `WiredApp`.
+clock injected into `CeilingStareApp`.
 
 **Verification:** `flutter analyze` and `flutter test` are clean, and the
 app was built (`flutter build ios --simulator --debug`) and exercised on the

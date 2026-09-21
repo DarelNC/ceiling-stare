@@ -52,7 +52,8 @@ explicitly when it's reached, not a commitment.
 - **Home-screen widget** showing current caffeine level. Mentioned once,
   undecided. If built, `caffeinated`'s widget decisions (status-only, no live
   ticking countdown for battery) are a reference, not a default.
-- **Real naming pass and bundle ID** (`com.example.wired` placeholder). See
+- **Final bundle ID** (`com.example.ceilingstare` placeholder, needs a real
+  reverse-domain) and the remaining name checks. See
   [../product.md](../product.md).
 
 ## Cut list

@@ -13,22 +13,62 @@ This project is a real attempt at that gap, not a reskin of `caffeinated`.
 installs/reviews"). Re-check before leaning on either figure in any public
 positioning.
 
-## Naming: provisional, pass still owed
+## Naming: Ceiling Stare, chosen 2026-09-21; final clearance still owed
 
-"wired" is a working codename picked to unblock the scaffold. Nothing has been
-checked: no collision search, no store search, no trademark, no domain or handle
-availability. Having used the name in files and commits doesn't make it settled.
+The project began as the codename "wired", picked to unblock the scaffold. On
+2026-09-21 it was renamed **Ceiling Stare** (what 3 a.m. looks like after cup
+number five), chosen from a shortlist after the check below. "Wired" was a
+well-known magazine name and a very common app-store word, and it was never
+checked; the rename made that moot.
 
-- Expect the pass to be hard, not a formality: "Wired" is a well-known magazine
-  name and a very common app-store word. That's a reason to run the check early,
-  not a finding.
-- Applied independently of `caffeinated`. A check on one sibling says nothing
-  about the other.
-- `applicationId` / bundle ID is still the `com.example.wired` placeholder. It
-  needs a real reverse-domain, and it depends on the final name, so do both
-  together before any store submission.
+**Done in code:** Dart package `ceiling_stare`, app title and home-screen name
+"Ceiling Stare", header wordmark, Android and iOS identifiers. The identifier is
+a placeholder: **`com.example.ceilingstare`** on both platforms. It is not
+publishable (Google Play rejects `com.example` IDs) and needs a real
+reverse-domain the owner controls. No domain has been bought, by choice, until
+there is a reason to; the ID can be changed later with a find-and-replace across
+`android/app/build.gradle.kts`, the Kotlin package path and
+`ios/Runner.xcodeproj/project.pbxproj`. Changing the ID after a release ships a
+different app to the stores, so settle it before the first submission.
 
-Must be done before anything goes public (store listing, public repo, release).
+**Not renamed:** the project folder is still `wired/` in the workspace, since
+moving it affects the workspace and every open session. Local data from the old
+bundle ID was not migrated (there were no users), so the renamed app starts empty.
+
+Applied independently of `caffeinated`. A check on one sibling says nothing
+about the other. Everything below must be finished before anything goes public
+(store listing, public repo, release).
+
+### Shortlist check, 2026-09-21
+
+Two candidates, chosen for a dry, sarcastic voice (constraints: no common names,
+no 3 to 4 letter names): **Ceiling Stare** and **Definitely Decaf**. Checked
+with the USPTO trademark search (US only), the iTunes search API for the App
+Store, Google Play search pages, DNS/whois/RDAP for domains, and public handle
+lookups.
+
+| | Ceiling Stare | Definitely Decaf |
+|---|---|---|
+| USPTO | no `CEILING STARE` record; only unrelated `STARE`-family marks (Death Stare, Blank Stare) | one dead mark (cancelled caffeine test device, serial 78071063); **one live, pending: `DEF. DECAF COFFEE / DEFINITELY DECAF FOR THE POWERFUL YET GROUNDED / ESTD 2026`, Definitely Something, Inc., class 30 coffee (serial 99900771)** |
+| App Store | no match; nearest concept is "Wall Stare: Staring at a wall" (Health & Fitness, 2 ratings) | no exact match, but a cluster of same-category apps named "Decaf": Decaf AI: Caffeine Tracker, Decaf - Stop Caffeine & Coffee, Quit Coffee - My Decaf Life, Coffee Dose (2,066 ratings) |
+| Google Play | no match | same cluster: Decaf - Quit Caffeine Fast, Decaf - Caffeine Tracker, Decaf |
+| Domains | `.com`, `.app`, `.co`, `.io` all unregistered | `.com` registered since 2017 (GoDaddy, parked); `.app`, `.co`, `.io` unregistered |
+| Handles | GitHub and npm free; Bluesky `ceilingstare.bsky.social` held by an empty account from 2024 | GitHub, Bluesky and npm free |
+
+**Reading:** Ceiling Stare is clear on everything checked. Definitely Decaf has a
+live coffee trademark application containing the exact phrase, filed by a party
+with priority, in an adjacent consumer market, and it would sit in store search
+next to four "Decaf" caffeine apps that mean the opposite (quitting) of what a
+tracker does.
+
+**Not checked, still owed before launch:** Instagram, X, TikTok (bot-walled), Reddit,
+non-US trademark registries (EUIPO/TMview, WIPO), a real clearance search, and a
+lawyer's read if the name matters commercially. A no-hit search is evidence, not
+clearance. The USPTO search is fuzzy: exact matches rank first, and none of the
+top 50 was `CEILING STARE`, but only the first page of each search was read.
+
+**Outcome:** Ceiling Stare was chosen. Definitely Decaf was dropped on the
+trademark finding.
 
 ## Accounts, login and PII: decided for v1, revisit deliberately
 

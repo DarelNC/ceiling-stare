@@ -65,7 +65,7 @@ centering exception is a single-element empty state.
 Type roles as built: Archivo Black for the big number, the today total, button
 titles and the error headline. Space Grotesk for section labels, captions and
 body. Major Mono Display for readouts only: mug scale marks, the `MG` unit,
-log-row times and amounts, plus the `WIRED` wordmark. DM Serif italic for the
+log-row times and amounts, plus the `CEILING STARE` wordmark. DM Serif italic for the
 one human line (the empty state).
 
 **Flat secondary controls.** The when-chips, MENU and BACK have a border but no hard shadow;

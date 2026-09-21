@@ -1,7 +1,7 @@
 # Project rules
 
-Durable project memory for **wired** (working codename): a caffeine intake
-tracker, Flutter, Android + iOS from day one, fully on-device. Adapted from the
+Durable project memory for **Ceiling Stare** (formerly the codename "wired"; see
+[product.md](product.md)): a caffeine intake tracker, Flutter, Android + iOS from day one, fully on-device. Adapted from the
 workspace library in `frag-ment/rules/`, following the layout in
 [`process.md`](../../rules/process.md) — one file per concern, never a single
 doc. This file started life as that single doc; on 2026-09-20 its contents were
