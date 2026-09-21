@@ -1,5 +1,6 @@
 import 'package:ceiling_stare/data/dose.dart';
 import 'package:ceiling_stare/data/dose_repository.dart';
+import 'package:ceiling_stare/state/theme_controller.dart';
 
 class InMemoryDoseRepository implements DoseRepository {
   InMemoryDoseRepository([Iterable<Dose> initial = const []])
@@ -29,4 +30,22 @@ class UnreadableDoseRepository implements DoseRepository {
   @override
   Future<void> remove(String id) async =>
       throw const FormatException('bad data');
+}
+
+/// Keeps the chosen theme id in memory. Set [failWrites] to simulate a store
+/// that can't be written.
+class InMemoryThemeStore implements ThemeStore {
+  InMemoryThemeStore([this.saved]);
+
+  String? saved;
+  bool failWrites = false;
+
+  @override
+  Future<String?> read() async => saved;
+
+  @override
+  Future<void> write(String id) async {
+    if (failWrites) throw StateError('disk full');
+    saved = id;
+  }
 }
