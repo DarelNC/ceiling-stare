@@ -146,14 +146,7 @@ class DoseRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 92,
-            child: Text(
-              time,
-              style: TextStyle(
-                fontFamily: Tokens.majorMono,
-                fontSize: 13,
-                color: t.mutedInk,
-              ),
-            ),
+            child: Text(time, style: Tokens.readout(color: t.mutedInk)),
           ),
           Expanded(
             child: Text(
@@ -168,11 +161,7 @@ class DoseRow extends StatelessWidget {
           ),
           Text(
             '${dose.mg} MG',
-            style: TextStyle(
-              fontFamily: Tokens.majorMono,
-              fontSize: 13,
-              color: t.ink,
-            ),
+            style: Tokens.readout(weight: FontWeight.w700, color: t.ink),
           ),
           Semantics(
             container: true,

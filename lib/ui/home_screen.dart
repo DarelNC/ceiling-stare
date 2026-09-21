@@ -313,10 +313,10 @@ class _Header extends StatelessWidget {
         Text(
           'CEILING STARE',
           style: TextStyle(
-            fontFamily: Tokens.majorMono,
+            fontFamily: Tokens.archivoBlack,
             color: t.ink,
-            fontSize: 13,
-            letterSpacing: 3,
+            fontSize: 14,
+            letterSpacing: 2,
           ),
         ),
         const Spacer(),
@@ -342,9 +342,10 @@ class _Header extends StatelessWidget {
                     Text(
                       text,
                       style: TextStyle(
-                        fontFamily: Tokens.majorMono,
+                        fontFamily: Tokens.spaceGrotesk,
+                        fontWeight: FontWeight.w600,
                         fontSize: 10,
-                        letterSpacing: 1,
+                        letterSpacing: 1.4,
                         color: t.mutedInk,
                       ),
                     ),
@@ -384,9 +385,10 @@ class _Readout extends StatelessWidget {
         Text(
           'MG',
           style: TextStyle(
-            fontFamily: Tokens.majorMono,
+            fontFamily: Tokens.spaceGrotesk,
+            fontWeight: FontWeight.w700,
             fontSize: 13,
-            letterSpacing: 3,
+            letterSpacing: 1.6,
             color: t.ink,
           ),
         ),
@@ -715,8 +717,10 @@ class _OtherSheetState extends State<_OtherSheet> {
               hintStyle: TextStyle(color: t.dim),
               suffixText: 'MG',
               suffixStyle: TextStyle(
-                fontFamily: Tokens.majorMono,
+                fontFamily: Tokens.spaceGrotesk,
+                fontWeight: FontWeight.w700,
                 fontSize: 14,
+                letterSpacing: 2,
                 color: t.mutedInk,
               ),
               enabledBorder: UnderlineInputBorder(

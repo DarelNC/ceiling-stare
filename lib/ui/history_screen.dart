@@ -189,11 +189,7 @@ class _DayHeader extends StatelessWidget {
           ),
           Text(
             '${group.totalMg} MG',
-            style: TextStyle(
-              fontFamily: Tokens.majorMono,
-              fontSize: 13,
-              color: t.ink,
-            ),
+            style: Tokens.readout(weight: FontWeight.w700, color: t.ink),
           ),
         ],
       ),

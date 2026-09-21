@@ -154,9 +154,9 @@ class _MenuItem extends StatelessWidget {
             children: [
               Text(
                 number,
-                style: TextStyle(
-                  fontFamily: Tokens.majorMono,
-                  fontSize: 12,
+                style: Tokens.readout(
+                  size: 12,
+                  weight: FontWeight.w700,
                   color: t.mutedInk,
                 ),
               ),

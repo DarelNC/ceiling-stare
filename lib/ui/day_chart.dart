@@ -51,12 +51,7 @@ class DayChart extends StatelessWidget {
             bottom: _axis + ruleY - 7,
             child: Text(
               '$referenceLimitMg',
-              style: TextStyle(
-                fontFamily: Tokens.majorMono,
-                fontSize: 10,
-                height: 1.2,
-                color: t.mutedInk,
-              ),
+              style: Tokens.readout(size: 11, height: 1.2, color: t.mutedInk),
             ),
           ),
           Positioned.fill(

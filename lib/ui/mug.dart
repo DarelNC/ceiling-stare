@@ -46,9 +46,8 @@ class Mug extends StatelessWidget {
                         child: Text(
                           '$mark',
                           textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: Tokens.majorMono,
-                            fontSize: 10,
+                          style: Tokens.readout(
+                            size: 11,
                             height: 1.2,
                             color: t.mutedInk,
                           ),
