@@ -41,6 +41,8 @@ class CsTheme {
     required this.accentText,
     required this.shadow,
     required this.rule,
+    this.liquidOverride,
+    this.mugGap = 0,
     this.shadowOffset = 0,
     this.border = 2,
     this.pattern = BgPattern.none,
@@ -113,6 +115,17 @@ class CsTheme {
   /// Ink outline on chart bars (for grounds where the fills are close).
   final bool outlinedBars;
 
+  /// Set only when the signal colour would be lost against the mug.
+  final Color? liquidOverride;
+
+  /// Empty space between the mug wall and the liquid (sides and bottom), so a
+  /// dark liquid doesn't fuse with a dark wall and shadow.
+  final double mugGap;
+
+  /// The mug's liquid and the chart bars. Usually the [signal] colour; a theme
+  /// can set its own when the signal colour is too close to the mug's inside.
+  Color get liquid => liquidOverride ?? signal;
+
   bool get isLight => brightness == Brightness.light;
 
   /// Scrim behind modal panels.
@@ -168,22 +181,25 @@ abstract final class CsThemes {
     blurb: 'Halftone dots, a yellow highlighter, black panels.',
     brightness: Brightness.light,
     ground: Color(0xFFEFE8DA),
-    mugInner: Color(0xFF1B1714),
+    mugInner: Color(0xFFFBF7EC),
     ink: Color(0xFF14110F),
-    mutedInk: Color(0xFF4F463E),
-    dim: Color(0xFF7D7266),
+    mutedInk: Color(0xFF3F372F),
+    dim: Color(0xFF62574B),
     signal: Color(0xFFE9FF4F),
     onSignal: Color(0xFF14110F),
-    alert: Color(0xFFFF5C1C),
+    alert: Color(0xFFE8460A),
     accentText: Color(0xFFB53F0A),
     shadow: Color(0xFF14110F),
     rule: Color(0xFF14110F),
+    // Yellow on the pale mug would vanish, so the liquid is ink; the yellow
+    // stays on the highlighter, the chips and the selected states.
+    liquidOverride: Color(0xFF14110F),
+    mugGap: 4,
     shadowOffset: 4,
     pattern: BgPattern.dots,
-    patternColor: Color(0x1F14110F),
+    patternColor: Color(0x1A14110F),
     numberStyle: NumberStyle.highlight,
     statPanel: true,
-    outlinedBars: true,
   );
 
   /// Yellow ground, black marks, hollow numbers.

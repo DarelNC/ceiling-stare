@@ -142,7 +142,7 @@ class _Column extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: empty
                             ? (isSelected ? t.ink : t.dim)
-                            : (over ? t.alert : t.signal),
+                            : (over ? t.alert : t.liquid),
                         // Themes whose bar fills sit close to the ground get an
                         // outline on every bar; the selected one is thicker.
                         border: !empty && (t.outlinedBars || isSelected)

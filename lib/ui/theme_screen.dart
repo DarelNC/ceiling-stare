@@ -149,7 +149,7 @@ class _Preview extends StatelessWidget {
             child: FractionallySizedBox(
               heightFactor: 0.45,
               widthFactor: 1,
-              child: ColoredBox(color: t.signal),
+              child: ColoredBox(color: t.liquid),
             ),
           ),
         ),

@@ -56,7 +56,7 @@ void main() {
 
       test('the liquid shows against the inside of the mug', () {
         expect(
-          contrast(t.signal, t.mugInner),
+          contrast(t.liquid, t.mugInner),
           greaterThanOrEqualTo(3),
           reason: 'signal',
         );
@@ -68,14 +68,14 @@ void main() {
       });
 
       test('normal and over-limit liquid can be told apart', () {
-        expect(t.signal == t.alert, isFalse);
-        expect(contrast(t.signal, t.alert), greaterThanOrEqualTo(1.5));
+        expect(t.liquid == t.alert, isFalse);
+        expect(contrast(t.liquid, t.alert), greaterThanOrEqualTo(1.5));
       });
 
       test('chart bars show against the ground (or are outlined)', () {
         if (!t.outlinedBars) {
           expect(
-            contrast(t.signal, t.ground),
+            contrast(t.liquid, t.ground),
             greaterThanOrEqualTo(3),
             reason: 'signal',
           );

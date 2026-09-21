@@ -91,14 +91,22 @@ class Mug extends StatelessWidget {
                   ),
                   child: Align(
                     alignment: Alignment.bottomCenter,
-                    child: AnimatedFractionallySizedBox(
-                      duration: const Duration(milliseconds: 700),
-                      curve: Curves.easeOutCubic,
-                      widthFactor: 1,
-                      heightFactor: fraction,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 400),
-                        color: over ? t.alert : t.signal,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        t.mugGap,
+                        0,
+                        t.mugGap,
+                        t.mugGap,
+                      ),
+                      child: AnimatedFractionallySizedBox(
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeOutCubic,
+                        widthFactor: 1,
+                        heightFactor: fraction,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          color: over ? t.alert : t.liquid,
+                        ),
                       ),
                     ),
                   ),

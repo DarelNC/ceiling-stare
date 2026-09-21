@@ -227,15 +227,13 @@ void main() {
       expect(text.style?.color, CsThemes.oxblood.ink);
     });
 
-    testWidgets('the mug liquid uses the theme signal and alert colours', (
-      tester,
-    ) async {
-      for (final t in [CsThemes.paper, CsThemes.acid]) {
+    testWidgets('the mug liquid uses each theme liquid colour', (tester) async {
+      for (final t in [CsThemes.paper, CsThemes.acid, CsThemes.newsprint]) {
         await tester.pumpWidget(const SizedBox());
         await pumpApp(tester, theme: t);
         final liquid = tester
             .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
-            .any((c) => (c.decoration as BoxDecoration?)?.color == t.signal);
+            .any((c) => (c.decoration as BoxDecoration?)?.color == t.liquid);
         // Empty log: the liquid box exists at zero height, in the signal colour.
         expect(liquid, isTrue, reason: t.name);
       }

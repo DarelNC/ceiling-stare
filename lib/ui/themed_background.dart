@@ -74,10 +74,10 @@ class PatternPainter extends CustomPainter {
         final paint = Paint()
           ..color = t.patternColor
           ..strokeCap = StrokeCap.round
-          ..strokeWidth = 1.8;
+          ..strokeWidth = 1.5;
         final points = <Offset>[
-          for (var y = 4.0; y < size.height; y += 7)
-            for (var x = 4.0; x < size.width; x += 7) Offset(x, y),
+          for (var y = 5.0; y < size.height; y += 8)
+            for (var x = 5.0; x < size.width; x += 8) Offset(x, y),
         ];
         canvas.drawPoints(PointMode.points, points, paint);
       case BgPattern.hatch:
