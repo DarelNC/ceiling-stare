@@ -22,7 +22,7 @@ that borrow elements from their poster, not copies of it.
 |---|---|---|
 | Oxblood | dark red | none added; the original look |
 | Paper | cream | one thick orange bar under the mug block; black type; no shadows; black big number |
-| Newsprint | cream with halftone dots | yellow highlighter block behind the number; today's total on an inverted black panel; hard black shadows; black mug |
+| Newsprint | cream with halftone dots | yellow highlighter block behind the number; today's total on an inverted black panel; hard black shadows; pale mug with a black liquid set in from the wall |
 | Acid | yellow with diagonal hatching | black header band that runs behind the status bar; hollow outlined numbers and titles; black liquid; outlined chart bars |
 | Blueprint | navy with a drawing grid | inset frame; `DWG. CS-01` and `SCALE 1 : 1` labels under the header; thin 1 px borders; hollow titles; yellow number |
 
@@ -39,8 +39,9 @@ copy, and the brief was to adapt, not to reproduce.
   constant to `CsThemes.all`.
 - Widgets read it with `context.cs` and never hard-code a colour. `Tokens` now
   holds font names only.
-- The **roles stay fixed** in every theme: `signal` is the liquid, chart bars
-  and selected state; `alert` is the same thing past the 400 mg reference line;
+- The **roles stay fixed** in every theme: `signal` is the selected state and
+  usually the liquid and chart bars (`liquid` says so when a theme needs a
+  different colour there); `alert` is the same thing past the 400 mg reference line;
   `ink` is text and borders on `ground`. A theme changes the values, not what
   they mean.
 - `CsThemeScope` puts a theme in the tree. The picker nests one per card, which
@@ -76,15 +77,31 @@ Newsprint's yellow bars vanished on cream and Acid's orange missed 3:1 on its
 pale mug (both fixed, one by outlining the bars and one by deepening the
 orange).
 
-### Two themes invert the liquid
+### The liquid can differ from the signal colour
 
+Each theme has a `liquid` (the mug fill and chart bars). It defaults to `signal`.
 Paper draws over-limit as black (its normal liquid is orange). Acid's normal
-liquid is black and over-limit is orange. That keeps each pair distinct on its
-own ground, and the roles above still hold: `alert` means past the limit.
+liquid is black and over-limit is orange. Newsprint keeps yellow for the
+highlighter, chips and selected states but draws the liquid black, because
+yellow on the pale mug has a contrast of about 1.1. `alert` still means past the
+limit everywhere.
 
 ### Live switch, no confirm
 
 A wrong pick costs one tap to undo and the result is the preview.
+
+## Rejected / tried
+
+- **Newsprint with a black mug and yellow liquid.** First version, and it looked
+  bad on the simulator. The black hard shadow, black wall and black interior fused
+  into one slab, the handle was a thin outline beside it, and the yellow was
+  only legible because of the black. Replaced by a pale mug, a black liquid and
+  a small gap (`mugGap`) between wall and liquid so the liquid can't merge with
+  the wall and shadow.
+- **Dense halftone dots.** They sat at the scale of the letter strokes and made
+  the small captions noisy. The dots are now finer, quieter and on a wider grid,
+  and Newsprint's secondary text is darker (`dim` is `#62574B`, about 5:1 on the
+  ground).
 
 ## Adversarial pass
 
