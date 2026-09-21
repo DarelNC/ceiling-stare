@@ -48,9 +48,6 @@ explicitly when it's reached, not a commitment.
   says matter, under-18 handling, how it changes the mug scale and the
   over-limit colour, and wording that reads as a reference, not medical advice.
   The data would stay on the device.
-- **UI and font cleanup.** Major Mono Display (wordmark, mug scale marks, the MG
-  unit, log-row times and amounts) is not liked. Pick a replacement and update the
-  type roles in [../design.md](../design.md).
 - **Show the caffeine drop over time.** The decay already exists (5 hour
   half-life, about 9 mg per 20 minutes at 200 mg active). Undecided whether to
   show the rate and a "clear by" time, tick the number more often, or change the

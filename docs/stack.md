@@ -54,8 +54,7 @@ physical device.
 
 ## Fonts: bundled locally
 
-Archivo Black, Major Mono Display, DM Serif Display Italic and Space Grotesk
-(variable) are committed under `assets/fonts/` with their OFL texts and declared
+Archivo Black, DM Serif Display Italic and Space Grotesk (variable) are committed under `assets/fonts/` with their OFL texts and declared
 in `pubspec.yaml`. No runtime fetch from Google Fonts. v1 is offline by design,
 so a font that can fail to load over the network would be a new failure mode for
 no benefit. Same call as `caffeinated`.

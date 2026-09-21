@@ -42,10 +42,9 @@ centering exception is a single-element empty state.
 
 | Face | Family key in code |
 |---|---|
-| Archivo Black: headlines | `Archivo Black` |
-| Major Mono Display: readouts and the wordmark | `Major Mono Display` |
+| Archivo Black: headlines, the big numbers, the wordmark | `Archivo Black` |
 | DM Serif Display italic: the human line | `DM Serif Display Italic` |
-| Space Grotesk: labels, captions, body | `Space Grotesk` |
+| Space Grotesk: labels, captions, body, and small readouts | `Space Grotesk` |
 
 **Palette, Oxblood** (values from `caffeinated/lib/main.dart`, declared in
 `lib/ui/app_theme.dart`):
@@ -63,10 +62,12 @@ centering exception is a single-element empty state.
 | `emberGlow` | `#6B1F18` | not declared yet; add when a screen uses it |
 
 Type roles as built: Archivo Black for the big number, the today total, button
-titles and the error headline. Space Grotesk for section labels, captions and
-body. Major Mono Display for readouts only: mug scale marks, the `MG` unit,
-log-row times and amounts, plus the `CEILING STARE` wordmark. DM Serif italic for the
-one human line (the empty state).
+titles, the wordmark and the error headline. Space Grotesk for section labels,
+captions and body, and for small readouts (mug scale marks, log-row times and
+amounts, day totals, menu numerals), where `Tokens.readout` turns on tabular
+figures so digits line up; Space Grotesk digits are proportional by default. DM
+Serif italic for the one human line (the empty state). Three faces. Major Mono
+Display was dropped on 2026-09-21.
 
 **Flat secondary controls.** The when-chips, MENU and BACK have a border but no hard shadow;
 the raised-with-shadow treatment is reserved for the primary action (drink
@@ -75,10 +76,10 @@ buttons, LOG IT). The Material time picker is themed to the identity in
 selection.
 
 **Menu and history.** The menu is a bordered panel with a hard rust shadow,
-numbered entries in Major Mono and labels in Archivo Black, dropped from the top
+numbered entries in Space Grotesk and labels in Archivo Black, dropped from the top
 right over a dimmed ground. The history trend strip reuses the mug's semantics:
 signal-yellow bars, alert orange past the 400 mg reference, the reference in a
-left gutter in Major Mono. Day sections are separated by a 2 px ink rule under
+left gutter in Space Grotesk. Day sections are separated by a 2 px ink rule under
 each day header and 1 px rust rules between doses.
 
 ## Themes
@@ -116,9 +117,9 @@ were assigned for a screen-awake utility.
 **Where the objection lands, and what it changes:**
 
 - Major Mono Display in `caffeinated` served a live-running-state feel (ticker,
-  labels). Here it earns its place only as an *instrument readout* (mg, hours
-  until clear). Where it would be used as a general "techy" signal, don't. This
-  was enforced in practice: see the first entry under Rejected / tried.
+  labels). It did not carry over: here it was used only for readouts, and it was
+  disliked anyway, so it was removed entirely (see Rejected / tried). The
+  readouts are now Space Grotesk with tabular figures.
 - **The mug-fill visual is reused, with its own reason, and kept.** In
   `caffeinated` the mug showed a countdown of screen-awake time. Here the liquid
   is caffeine *still active*: it rises when a drink is logged and drains as the
@@ -131,11 +132,13 @@ were assigned for a screen-awake utility.
 
 ## Rejected / tried
 
-- **Major Mono Display for section labels** (`STILL ACTIVE`, `TAP TO LOG`,
-  `TODAY`). Built first, screenshotted, rejected: at 11 px its letterforms are
-  hard to read, and it was exactly the general "techy signal" use the reuse
-  check rules out. Replaced by Space Grotesk bold caps with letter-spacing, which
-  is also what `caffeinated` uses for labels.
+- **Major Mono Display.** First tried for section labels, and rejected at 11 px
+  because its letterforms are hard to read; those became Space Grotesk bold caps
+  with letter-spacing. It stayed for readouts and the wordmark until 2026-09-21,
+  when it was removed altogether as a face the owner did not like. Its font file
+  and licence text are deleted. The wordmark is Archivo Black; readouts are Space
+  Grotesk with tabular figures. A slashed zero was tried on the readouts and
+  dropped as another techy tell.
 - **A scrim that blended into a solid.** The menu's dim layer first came out
   nearly opaque black because the colour was blended instead of made
   translucent. Fixed; caught by looking at the running app.
