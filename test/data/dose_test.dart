@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/data/dose.dart';
+import 'package:ceiling_stare/data/dose.dart';
 
 void main() {
   final at = DateTime.utc(2026, 9, 20, 8, 30);

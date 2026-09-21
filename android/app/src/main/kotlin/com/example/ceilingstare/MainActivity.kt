@@ -1,4 +1,4 @@
-package com.example.wired
+package com.example.ceilingstare
 
 import io.flutter.embedding.android.FlutterActivity
 

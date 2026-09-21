@@ -6,21 +6,25 @@ import 'ui/home_screen.dart';
 import 'ui/tokens.dart';
 
 void main() {
-  runApp(const WiredApp());
+  runApp(const CeilingStareApp());
 }
 
-class WiredApp extends StatefulWidget {
-  const WiredApp({super.key, this.repository, this.clock = DateTime.now});
+class CeilingStareApp extends StatefulWidget {
+  const CeilingStareApp({
+    super.key,
+    this.repository,
+    this.clock = DateTime.now,
+  });
 
   /// Defaults to the on-device store. Tests pass an in-memory one.
   final DoseRepository? repository;
   final DateTime Function() clock;
 
   @override
-  State<WiredApp> createState() => _WiredAppState();
+  State<CeilingStareApp> createState() => _CeilingStareAppState();
 }
 
-class _WiredAppState extends State<WiredApp> {
+class _CeilingStareAppState extends State<CeilingStareApp> {
   late final DoseLog _log = DoseLog(
     widget.repository ?? PrefsDoseRepository(),
     widget.clock,
@@ -35,7 +39,7 @@ class _WiredAppState extends State<WiredApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'wired',
+      title: 'Ceiling Stare',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,

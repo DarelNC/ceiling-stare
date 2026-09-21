@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/data/dose.dart';
-import 'package:wired/main.dart';
-import 'package:wired/ui/day_chart.dart';
-import 'package:wired/domain/history.dart';
-import 'package:wired/ui/tokens.dart';
+import 'package:ceiling_stare/data/dose.dart';
+import 'package:ceiling_stare/main.dart';
+import 'package:ceiling_stare/ui/day_chart.dart';
+import 'package:ceiling_stare/domain/history.dart';
+import 'package:ceiling_stare/ui/tokens.dart';
 
 import '../support/in_memory_repository.dart';
 
@@ -24,7 +24,7 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      WiredApp(repository: repo, clock: clock ?? () => now),
+      CeilingStareApp(repository: repo, clock: clock ?? () => now),
     );
     await tester.pumpAndSettle();
   }

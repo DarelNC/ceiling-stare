@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/data/dose.dart';
-import 'package:wired/main.dart';
-import 'package:wired/ui/hard_button.dart';
+import 'package:ceiling_stare/data/dose.dart';
+import 'package:ceiling_stare/main.dart';
+import 'package:ceiling_stare/ui/hard_button.dart';
 
 import '../support/in_memory_repository.dart';
 
@@ -21,7 +21,7 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      WiredApp(repository: repo, clock: clock ?? () => now),
+      CeilingStareApp(repository: repo, clock: clock ?? () => now),
     );
     await tester.pumpAndSettle();
   }
@@ -30,7 +30,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, InMemoryDoseRepository());
-    expect(find.text('WIRED'), findsOneWidget);
+    expect(find.text('CEILING STARE'), findsOneWidget);
     expect(find.text('MENU'), findsOneWidget);
     expect(find.text('SEE LOG'), findsOneWidget);
     expect(

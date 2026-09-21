@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/data/dose.dart';
-import 'package:wired/state/dose_log.dart';
+import 'package:ceiling_stare/data/dose.dart';
+import 'package:ceiling_stare/state/dose_log.dart';
 
 import '../support/in_memory_repository.dart';
 

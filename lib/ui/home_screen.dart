@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Row(
                   children: [
                     const Text(
-                      'WIRED',
+                      'CEILING STARE',
                       style: TextStyle(
                         fontFamily: Tokens.majorMono,
                         color: Tokens.ink,

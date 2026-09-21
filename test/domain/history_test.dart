@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/data/dose.dart';
-import 'package:wired/domain/history.dart';
+import 'package:ceiling_stare/data/dose.dart';
+import 'package:ceiling_stare/domain/history.dart';
 
 Dose dose(int mg, DateTime at) =>
     Dose.create(source: DoseSource.coffee, mg: mg, at: at);

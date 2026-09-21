@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
-import 'package:wired/data/dose.dart';
-import 'package:wired/data/dose_repository.dart';
+import 'package:ceiling_stare/data/dose.dart';
+import 'package:ceiling_stare/data/dose_repository.dart';
 
 Dose dose(int mg, DateTime at, [DoseSource s = DoseSource.coffee]) =>
     Dose.create(source: s, mg: mg, at: at);

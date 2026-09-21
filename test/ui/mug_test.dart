@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wired/ui/mug.dart';
-import 'package:wired/ui/tokens.dart';
+import 'package:ceiling_stare/ui/mug.dart';
+import 'package:ceiling_stare/ui/tokens.dart';
 
 void main() {
   Future<void> pumpMug(WidgetTester tester, double mg) async {
