@@ -223,10 +223,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: t.ground,
       body: ThemedBackground(
-        // A solid band runs up behind the status bar, so its icons go light.
-        overlay: t.bandHeader ? SystemUiOverlayStyle.light : null,
         child: SafeArea(
-          top: !t.bandHeader,
           child: ListenableBuilder(
             listenable: _log,
             builder: (context, _) {
@@ -251,11 +248,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               Expanded(child: _Readout(activeMg: active)),
                             ],
                           ),
-                          if (t.accentBar) ...[
-                            const SizedBox(height: 20),
-                            Container(height: 16, color: t.signal),
-                            const SizedBox(height: 4),
-                          ],
                           const SizedBox(height: 22),
                           _TodayLine(
                             count: today.length,
@@ -307,8 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
-/// Wordmark and MENU. Some themes turn it into a solid band or add
-/// drawing-office labels under it.
+/// Wordmark and MENU. Blueprint adds drawing-office labels under it.
 class _Header extends StatelessWidget {
   const _Header({required this.onMenu});
 
@@ -317,35 +308,21 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.cs;
-    final band = t.bandHeader;
-    final wordmark = Text(
-      'CEILING STARE',
-      style: TextStyle(
-        fontFamily: Tokens.majorMono,
-        color: band ? t.ground : t.ink,
-        fontSize: 13,
-        letterSpacing: 3,
-      ),
-    );
     final row = Row(
       children: [
-        wordmark,
+        Text(
+          'CEILING STARE',
+          style: TextStyle(
+            fontFamily: Tokens.majorMono,
+            color: t.ink,
+            fontSize: 13,
+            letterSpacing: 3,
+          ),
+        ),
         const Spacer(),
-        MenuButton(onTap: onMenu, inverted: band),
+        MenuButton(onTap: onMenu),
       ],
     );
-    if (band) {
-      return Container(
-        color: t.ink,
-        padding: EdgeInsets.fromLTRB(
-          22,
-          12 + MediaQuery.paddingOf(context).top,
-          22,
-          12,
-        ),
-        child: row,
-      );
-    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
       child: Column(

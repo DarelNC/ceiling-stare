@@ -102,17 +102,6 @@ class BigNumber extends StatelessWidget {
         );
       case NumberStyle.plain:
         return Text(text, style: base.copyWith(color: t.signal));
-      case NumberStyle.outline:
-        return Text(
-          text,
-          style: base.copyWith(
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = size > 50 ? 2.5 : 1.5
-              ..strokeJoin = StrokeJoin.round
-              ..color = t.ink,
-          ),
-        );
       case NumberStyle.highlight:
         return Container(
           margin: EdgeInsets.only(

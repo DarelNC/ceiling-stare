@@ -13,7 +13,6 @@ class ThemedBackground extends StatelessWidget {
     required this.child,
     this.systemUi = true,
     this.expand = true,
-    this.overlay,
   });
 
   final Widget child;
@@ -25,10 +24,6 @@ class ThemedBackground extends StatelessWidget {
   /// Fill the space it's given (a screen). Set false to size to the child
   /// (a card inside a scrolling list).
   final bool expand;
-
-  /// Status bar style when the top of the screen isn't the ground colour
-  /// (a solid header band). Defaults to whatever suits the ground.
-  final SystemUiOverlayStyle? overlay;
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +47,7 @@ class ThemedBackground extends StatelessWidget {
     );
     if (!systemUi) return body;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value:
-          overlay ??
-          (t.isLight ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light),
+      value: t.isLight ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light,
       child: body,
     );
   }
@@ -80,17 +73,6 @@ class PatternPainter extends CustomPainter {
             for (var x = 5.0; x < size.width; x += 8) Offset(x, y),
         ];
         canvas.drawPoints(PointMode.points, points, paint);
-      case BgPattern.hatch:
-        final paint = Paint()
-          ..color = t.patternColor
-          ..strokeWidth = 1;
-        for (var x = -size.height; x < size.width; x += 9) {
-          canvas.drawLine(
-            Offset(x, size.height),
-            Offset(x + size.height, 0),
-            paint,
-          );
-        }
       case BgPattern.blueprint:
         final minor = Paint()
           ..color = t.patternColor.withValues(alpha: 0.16)

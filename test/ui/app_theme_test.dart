@@ -72,19 +72,17 @@ void main() {
         expect(contrast(t.liquid, t.alert), greaterThanOrEqualTo(1.5));
       });
 
-      test('chart bars show against the ground (or are outlined)', () {
-        if (!t.outlinedBars) {
-          expect(
-            contrast(t.liquid, t.ground),
-            greaterThanOrEqualTo(3),
-            reason: 'signal',
-          );
-          expect(
-            contrast(t.alert, t.ground),
-            greaterThanOrEqualTo(3),
-            reason: 'alert',
-          );
-        }
+      test('chart bars show against the ground', () {
+        expect(
+          contrast(t.liquid, t.ground),
+          greaterThanOrEqualTo(3),
+          reason: 'signal',
+        );
+        expect(
+          contrast(t.alert, t.ground),
+          greaterThanOrEqualTo(3),
+          reason: 'alert',
+        );
       });
 
       test('inverted stat panel text is readable', () {
@@ -96,4 +94,30 @@ void main() {
       });
     });
   }
+
+  group('text shadow', () {
+    test('Oxblood has one, in the shadow colour', () {
+      final shadows = CsThemes.oxblood.hardTextShadow();
+      expect(shadows, hasLength(1));
+      expect(shadows.single.color, CsThemes.oxblood.shadow);
+    });
+
+    test('Newsprint has none: its shadow is the same colour as the text', () {
+      expect(CsThemes.newsprint.shadow, CsThemes.newsprint.ink);
+      expect(CsThemes.newsprint.hardTextShadow(), isEmpty);
+      expect(CsThemes.newsprint.hardTextShadow(extra: 1), isEmpty);
+    });
+
+    test('Blueprint has none: it has no shadows at all', () {
+      expect(CsThemes.blueprint.hardTextShadow(), isEmpty);
+    });
+  });
+
+  test('there are exactly the three kept themes, Oxblood first', () {
+    expect(CsThemes.all.map((t) => t.id), [
+      'oxblood',
+      'newsprint',
+      'blueprint',
+    ]);
+  });
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Background texture behind every screen.
-enum BgPattern { none, dots, hatch, blueprint }
+enum BgPattern { none, dots, blueprint }
 
 /// How the big "still active" number is drawn.
 enum NumberStyle {
@@ -10,9 +10,6 @@ enum NumberStyle {
 
   /// Ink on a solid signal block with a hard shadow.
   highlight,
-
-  /// Hollow letters, stroke only.
-  outline,
 
   /// Filled in the signal colour, no shadow.
   plain,
@@ -49,12 +46,9 @@ class CsTheme {
     this.patternColor = const Color(0x00000000),
     this.numberStyle = NumberStyle.shadowed,
     this.outlineTitle = false,
-    this.accentBar = false,
     this.statPanel = false,
-    this.bandHeader = false,
     this.titleBlock = false,
     this.frame = false,
-    this.outlinedBars = false,
   });
 
   final String id;
@@ -97,23 +91,14 @@ class CsTheme {
   /// Big screen titles drawn hollow.
   final bool outlineTitle;
 
-  /// A thick signal bar under the mug block.
-  final bool accentBar;
-
   /// Today's total in an inverted panel.
   final bool statPanel;
-
-  /// Header as a solid ink band across the top.
-  final bool bandHeader;
 
   /// Drawing-office labels under the header.
   final bool titleBlock;
 
   /// Thin frame drawn inside the screen edge.
   final bool frame;
-
-  /// Ink outline on chart bars (for grounds where the fills are close).
-  final bool outlinedBars;
 
   /// Set only when the signal colour would be lost against the mug.
   final Color? liquidOverride;
@@ -154,26 +139,6 @@ abstract final class CsThemes {
     shadowOffset: 4,
   );
 
-  /// Cream and black type with one orange bar.
-  static const paper = CsTheme(
-    id: 'paper',
-    name: 'Paper',
-    blurb: 'Cream, black type, one thick orange bar.',
-    brightness: Brightness.light,
-    ground: Color(0xFFF5EFE6),
-    mugInner: Color(0xFFF1EADC),
-    ink: Color(0xFF14110F),
-    mutedInk: Color(0xFF5A4E46),
-    dim: Color(0xFF857468),
-    signal: Color(0xFFE8460A),
-    onSignal: Color(0xFF14110F),
-    alert: Color(0xFF14110F),
-    accentText: Color(0xFFB53F0A),
-    shadow: Color(0xFF14110F),
-    rule: Color(0xFF14110F),
-    accentBar: true,
-  );
-
   /// Halftone dots, a yellow highlighter, black stat panels.
   static const newsprint = CsTheme(
     id: 'newsprint',
@@ -202,31 +167,6 @@ abstract final class CsThemes {
     statPanel: true,
   );
 
-  /// Yellow ground, black marks, hollow numbers.
-  static const acid = CsTheme(
-    id: 'acid',
-    name: 'Acid',
-    blurb: 'Yellow everywhere. Black marks, hollow numbers.',
-    brightness: Brightness.light,
-    ground: Color(0xFFE9FF4F),
-    mugInner: Color(0xFFFCFFD9),
-    ink: Color(0xFF14110F),
-    mutedInk: Color(0xFF363A0C),
-    dim: Color(0xFF565E10),
-    signal: Color(0xFF14110F),
-    onSignal: Color(0xFFE9FF4F),
-    alert: Color(0xFFE8460A),
-    accentText: Color(0xFF14110F),
-    shadow: Color(0xFF14110F),
-    rule: Color(0xFF14110F),
-    pattern: BgPattern.hatch,
-    patternColor: Color(0x1214110F),
-    numberStyle: NumberStyle.outline,
-    outlineTitle: true,
-    bandHeader: true,
-    outlinedBars: true,
-  );
-
   /// Navy grid, thin lines, drawing-office labels.
   static const blueprint = CsTheme(
     id: 'blueprint',
@@ -253,7 +193,7 @@ abstract final class CsThemes {
     frame: true,
   );
 
-  static const all = [oxblood, paper, newsprint, acid, blueprint];
+  static const all = [oxblood, newsprint, blueprint];
 
   /// Unknown or missing ids fall back to the default rather than failing.
   static CsTheme byId(String? id) =>
@@ -279,8 +219,11 @@ extension CsThemeContext on BuildContext {
 }
 
 extension CsThemeShadows on CsTheme {
-  /// Hard, zero-blur text shadow; empty when the theme has no shadows.
-  List<Shadow> hardTextShadow({double extra = 0}) => shadowOffset > 0
+  /// Hard, zero-blur text shadow. Empty when the theme has no shadows, and also
+  /// when the shadow is the same colour as the text (Newsprint): then it can't
+  /// read as a shadow and only smears the letters.
+  List<Shadow> hardTextShadow({double extra = 0}) =>
+      shadowOffset > 0 && shadow != ink
       ? [
           Shadow(
             color: shadow,

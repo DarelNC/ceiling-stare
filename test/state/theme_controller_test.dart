@@ -14,8 +14,15 @@ void main() {
   });
 
   test('starts on the saved theme', () async {
-    final c = await ThemeController.load(InMemoryThemeStore('acid'));
-    expect(c.theme, CsThemes.acid);
+    final c = await ThemeController.load(InMemoryThemeStore('newsprint'));
+    expect(c.theme, CsThemes.newsprint);
+  });
+
+  test('ids of removed themes fall back to the default', () async {
+    for (final id in ['paper', 'acid']) {
+      final c = await ThemeController.load(InMemoryThemeStore(id));
+      expect(c.theme, CsThemes.oxblood, reason: id);
+    }
   });
 
   test('an unknown saved id falls back to the default', () async {
@@ -36,11 +43,11 @@ void main() {
   });
 
   test('selecting the current theme does nothing', () async {
-    final store = InMemoryThemeStore('paper');
+    final store = InMemoryThemeStore('newsprint');
     final c = await ThemeController.load(store);
     var notified = 0;
     c.addListener(() => notified++);
-    await c.select(CsThemes.paper);
+    await c.select(CsThemes.newsprint);
     expect(notified, 0);
   });
 
@@ -53,7 +60,7 @@ void main() {
 
   test('a save that finishes after dispose is ignored', () async {
     final c = await ThemeController.load(InMemoryThemeStore());
-    final pending = c.select(CsThemes.acid);
+    final pending = c.select(CsThemes.blueprint);
     c.dispose();
     await pending;
   });
@@ -67,15 +74,15 @@ void main() {
     test('round-trips through shared preferences', () async {
       final store = PrefsThemeStore();
       expect(await store.read(), isNull);
-      await store.write('paper');
-      expect(await PrefsThemeStore().read(), 'paper');
+      await store.write('newsprint');
+      expect(await PrefsThemeStore().read(), 'newsprint');
     });
 
     test('stores under its own key', () async {
-      await PrefsThemeStore().write('acid');
+      await PrefsThemeStore().write('blueprint');
       expect(
         await SharedPreferencesAsync().getString(PrefsThemeStore.key),
-        'acid',
+        'blueprint',
       );
     });
   });

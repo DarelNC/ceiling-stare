@@ -146,10 +146,13 @@ class _Preview extends StatelessWidget {
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              heightFactor: 0.45,
-              widthFactor: 1,
-              child: ColoredBox(color: t.liquid),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(t.mugGap, 0, t.mugGap, t.mugGap),
+              child: FractionallySizedBox(
+                heightFactor: 0.45,
+                widthFactor: 1,
+                child: ColoredBox(color: t.liquid),
+              ),
             ),
           ),
         ),

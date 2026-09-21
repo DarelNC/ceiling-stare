@@ -76,28 +76,28 @@ void main() {
       expect(groundOf(tester), CsThemes.oxblood.ground);
       await openThemeScreen(tester);
 
-      await tester.tap(find.text('PAPER'));
+      await tester.tap(find.text('NEWSPRINT'));
       await tester.pumpAndSettle();
-      expect(controller.theme, CsThemes.paper);
-      expect(store.saved, 'paper');
+      expect(controller.theme, CsThemes.newsprint);
+      expect(store.saved, 'newsprint');
       // The screen we're on restyled itself...
-      expect(groundOf(tester), CsThemes.paper.ground);
+      expect(groundOf(tester), CsThemes.newsprint.ground);
       // ...and so did the one underneath.
       await tester.tap(find.text('BACK'));
       await tester.pumpAndSettle();
-      expect(groundOf(tester), CsThemes.paper.ground);
+      expect(groundOf(tester), CsThemes.newsprint.ground);
       expect(find.text('CEILING STARE'), findsOneWidget);
     });
 
     testWidgets('the in-use marker moves with the choice', (tester) async {
       await pumpApp(tester);
       await openThemeScreen(tester);
-      await tester.tap(find.text('ACID'));
+      await tester.tap(find.text('BLUEPRINT'));
       await tester.pumpAndSettle();
       expect(find.text('IN USE'), findsOneWidget);
       final marker = tester.getCenter(find.text('IN USE')).dy;
-      final acidCard = tester.getCenter(find.text('ACID')).dy;
-      expect((marker - acidCard).abs(), lessThan(20));
+      final card = tester.getCenter(find.text('BLUEPRINT')).dy;
+      expect((marker - card).abs(), lessThan(20));
     });
 
     testWidgets('a saved theme is what the app opens with', (tester) async {
@@ -120,7 +120,7 @@ void main() {
     });
 
     testWidgets('going back to the default works too', (tester) async {
-      await pumpApp(tester, theme: CsThemes.acid);
+      await pumpApp(tester, theme: CsThemes.blueprint);
       await openThemeScreen(tester);
       await tester.tap(find.text('OXBLOOD'));
       await tester.pumpAndSettle();
@@ -166,22 +166,6 @@ void main() {
   });
 
   group('signature elements', () {
-    bool hasBox(WidgetTester tester, double height, Color color) => tester
-        .widgetList<Container>(find.byType(Container))
-        .any((c) => c.color == color && c.constraints?.maxHeight == height);
-
-    testWidgets('paper has the thick accent bar, oxblood does not', (
-      tester,
-    ) async {
-      await pumpApp(tester, theme: CsThemes.paper);
-      expect(hasBox(tester, 16, CsThemes.paper.signal), isTrue);
-    });
-
-    testWidgets('oxblood has no accent bar', (tester) async {
-      await pumpApp(tester);
-      expect(hasBox(tester, 16, CsThemes.oxblood.signal), isFalse);
-    });
-
     testWidgets('blueprint shows drawing-office labels, others do not', (
       tester,
     ) async {
@@ -193,15 +177,9 @@ void main() {
     testWidgets('no drawing labels outside blueprint', (tester) async {
       await pumpApp(tester);
       expect(find.text('DWG. CS-01'), findsNothing);
-    });
-
-    testWidgets('acid puts the header on a solid ink band', (tester) async {
-      await pumpApp(tester, theme: CsThemes.acid);
-      final band = tester
-          .widgetList<Container>(find.byType(Container))
-          .where((c) => c.color == CsThemes.acid.ink)
-          .isNotEmpty;
-      expect(band, isTrue);
+      await tester.pumpWidget(const SizedBox());
+      await pumpApp(tester, theme: CsThemes.newsprint);
+      expect(find.text('DWG. CS-01'), findsNothing);
     });
 
     testWidgets('newsprint puts today on an inverted panel', (tester) async {
@@ -213,28 +191,52 @@ void main() {
       expect(panel, isTrue);
     });
 
-    testWidgets('the big number is hollow in acid and filled in oxblood', (
-      tester,
-    ) async {
-      await pumpApp(tester, theme: CsThemes.acid);
-      var text = tester.widget<Text>(find.text('0').first);
-      expect(text.style?.foreground?.style, PaintingStyle.stroke);
+    testWidgets('the big number: shadowed, highlighted, plain', (tester) async {
+      Text number() => tester.widget<Text>(find.text('0').first);
+
+      await pumpApp(tester);
+      expect(number().style?.color, CsThemes.oxblood.ink);
+      expect(number().style?.shadows, isNotEmpty);
 
       await tester.pumpWidget(const SizedBox());
-      await pumpApp(tester);
-      text = tester.widget<Text>(find.text('0').first);
-      expect(text.style?.foreground, isNull);
-      expect(text.style?.color, CsThemes.oxblood.ink);
+      await pumpApp(tester, theme: CsThemes.newsprint);
+      final onBlock = tester
+          .widgetList<Container>(find.byType(Container))
+          .any(
+            (c) =>
+                (c.decoration as BoxDecoration?)?.color ==
+                CsThemes.newsprint.signal,
+          );
+      expect(onBlock, isTrue, reason: 'highlighter block behind the number');
+
+      await tester.pumpWidget(const SizedBox());
+      await pumpApp(tester, theme: CsThemes.blueprint);
+      expect(number().style?.color, CsThemes.blueprint.signal);
+      expect(number().style?.shadows, anyOf(isNull, isEmpty));
+    });
+
+    testWidgets('big titles carry a shadow in oxblood and none in newsprint', (
+      tester,
+    ) async {
+      Future<List<Shadow>?> titleShadows(CsTheme t) async {
+        await tester.pumpWidget(const SizedBox());
+        await pumpApp(tester, theme: t);
+        await openThemeScreen(tester);
+        return tester.widget<Text>(find.text('THEME').first).style?.shadows;
+      }
+
+      expect(await titleShadows(CsThemes.oxblood), isNotEmpty);
+      expect(await titleShadows(CsThemes.newsprint), anyOf(isNull, isEmpty));
     });
 
     testWidgets('the mug liquid uses each theme liquid colour', (tester) async {
-      for (final t in [CsThemes.paper, CsThemes.acid, CsThemes.newsprint]) {
+      for (final t in [CsThemes.newsprint, CsThemes.blueprint]) {
         await tester.pumpWidget(const SizedBox());
         await pumpApp(tester, theme: t);
         final liquid = tester
             .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
             .any((c) => (c.decoration as BoxDecoration?)?.color == t.liquid);
-        // Empty log: the liquid box exists at zero height, in the signal colour.
+        // Empty log: the liquid box exists at zero height, in the liquid colour.
         expect(liquid, isTrue, reason: t.name);
       }
     });

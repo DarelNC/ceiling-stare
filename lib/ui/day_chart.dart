@@ -143,13 +143,8 @@ class _Column extends StatelessWidget {
                         color: empty
                             ? (isSelected ? t.ink : t.dim)
                             : (over ? t.alert : t.liquid),
-                        // Themes whose bar fills sit close to the ground get an
-                        // outline on every bar; the selected one is thicker.
-                        border: !empty && (t.outlinedBars || isSelected)
-                            ? Border.all(
-                                color: t.ink,
-                                width: isSelected ? 2 : 1,
-                              )
+                        border: isSelected && !empty
+                            ? Border.all(color: t.ink, width: 2)
                             : null,
                       ),
                     ),

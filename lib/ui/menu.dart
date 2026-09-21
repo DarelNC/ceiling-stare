@@ -8,17 +8,14 @@ enum MenuDestination { history, theme }
 /// The header control that opens the menu. Flat, not raised: the hard shadow
 /// is reserved for the primary actions.
 class MenuButton extends StatelessWidget {
-  const MenuButton({super.key, required this.onTap, this.inverted = false});
+  const MenuButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
-
-  /// For a dark band: draws in the ground colour instead of the ink colour.
-  final bool inverted;
 
   @override
   Widget build(BuildContext context) {
     final t = context.cs;
-    final c = inverted ? t.ground : t.ink;
+    final c = t.ink;
     return Semantics(
       button: true,
       label: 'Menu',
