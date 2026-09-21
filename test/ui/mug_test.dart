@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ceiling_stare/ui/mug.dart';
-import 'package:ceiling_stare/ui/tokens.dart';
+import 'package:ceiling_stare/ui/app_theme.dart';
 
 void main() {
   Future<void> pumpMug(WidgetTester tester, double mg) async {
@@ -39,13 +39,13 @@ void main() {
   ) async {
     await pumpMug(tester, 200);
     expect(fill(tester), 0.5);
-    expect(liquid(tester), Tokens.signal);
+    expect(liquid(tester), CsThemes.oxblood.signal);
   });
 
   testWidgets('full at the limit, still signal', (tester) async {
     await pumpMug(tester, 400);
     expect(fill(tester), 1);
-    expect(liquid(tester), Tokens.signal);
+    expect(liquid(tester), CsThemes.oxblood.signal);
   });
 
   testWidgets('past the limit it stays full and turns to alert', (
@@ -53,6 +53,6 @@ void main() {
   ) async {
     await pumpMug(tester, 650);
     expect(fill(tester), 1);
-    expect(liquid(tester), Tokens.alert);
+    expect(liquid(tester), CsThemes.oxblood.alert);
   });
 }

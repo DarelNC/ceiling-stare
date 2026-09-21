@@ -4,7 +4,7 @@ import 'package:ceiling_stare/data/dose.dart';
 import 'package:ceiling_stare/main.dart';
 import 'package:ceiling_stare/ui/day_chart.dart';
 import 'package:ceiling_stare/domain/history.dart';
-import 'package:ceiling_stare/ui/tokens.dart';
+import 'package:ceiling_stare/ui/app_theme.dart';
 
 import '../support/in_memory_repository.dart';
 
@@ -244,8 +244,11 @@ void main() {
       tester,
     ) async {
       await pumpChart(tester, [0, 100, 400, 401, 650]);
-      expect(barsColoured(tester, Tokens.alert), 2); // 401 and 650
-      expect(barsColoured(tester, Tokens.signal), 2); // 100 and exactly 400
+      expect(barsColoured(tester, CsThemes.oxblood.alert), 2); // 401 and 650
+      expect(
+        barsColoured(tester, CsThemes.oxblood.signal),
+        2,
+      ); // 100 and exactly 400
     });
 
     testWidgets('a day past the limit rescales the others', (tester) async {
@@ -253,7 +256,9 @@ void main() {
       final heights = tester
           .widgetList<Container>(find.byType(Container))
           .where(
-            (w) => colourOf(w) == Tokens.signal || colourOf(w) == Tokens.alert,
+            (w) =>
+                colourOf(w) == CsThemes.oxblood.signal ||
+                colourOf(w) == CsThemes.oxblood.alert,
           )
           .map((w) => w.constraints!.maxHeight)
           .toList();
@@ -263,7 +268,7 @@ void main() {
     testWidgets('an empty day is a short stub, not nothing', (tester) async {
       await pumpChart(tester, [0, 0, 100]);
       // Two empty days, plus the reference rule drawn in the same colour.
-      expect(barsColoured(tester, Tokens.dim), 3);
+      expect(barsColoured(tester, CsThemes.oxblood.dim), 3);
     });
   });
 }

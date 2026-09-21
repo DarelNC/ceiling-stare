@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../domain/caffeine.dart';
 import '../domain/history.dart';
 import 'tokens.dart';
+import 'app_theme.dart';
 
 /// One bar per day, height = that day's total, with a rule at the reference
 /// limit. Bars past the limit take the alert colour, matching the mug. Tap a
@@ -31,6 +32,7 @@ class DayChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     final tallest = days.fold(0, (m, d) => math.max(m, d.mg));
     // Scale to the reference limit, growing only if a day exceeds it, so the
     // rule stays at a fixed place on an ordinary week.
@@ -47,13 +49,13 @@ class DayChart extends StatelessWidget {
           Positioned(
             left: 0,
             bottom: _axis + ruleY - 7,
-            child: const Text(
+            child: Text(
               '$referenceLimitMg',
               style: TextStyle(
                 fontFamily: Tokens.majorMono,
                 fontSize: 10,
                 height: 1.2,
-                color: Tokens.mutedInk,
+                color: t.mutedInk,
               ),
             ),
           ),
@@ -66,7 +68,7 @@ class DayChart extends StatelessWidget {
                   left: 0,
                   right: 0,
                   bottom: _axis + ruleY - 1,
-                  child: Container(height: 2, color: Tokens.dim),
+                  child: Container(height: 2, color: t.dim),
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,6 +114,7 @@ class _Column extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     final empty = total.mg == 0;
     final over = total.mg > referenceLimitMg;
     return Semantics(
@@ -138,10 +141,15 @@ class _Column extends StatelessWidget {
                       height: h,
                       decoration: BoxDecoration(
                         color: empty
-                            ? (isSelected ? Tokens.ink : Tokens.dim)
-                            : (over ? Tokens.alert : Tokens.signal),
-                        border: isSelected && !empty
-                            ? Border.all(color: Tokens.ink, width: 2)
+                            ? (isSelected ? t.ink : t.dim)
+                            : (over ? t.alert : t.signal),
+                        // Themes whose bar fills sit close to the ground get an
+                        // outline on every bar; the selected one is thicker.
+                        border: !empty && (t.outlinedBars || isSelected)
+                            ? Border.all(
+                                color: t.ink,
+                                width: isSelected ? 2 : 1,
+                              )
                             : null,
                       ),
                     ),
@@ -155,7 +163,7 @@ class _Column extends StatelessWidget {
                   fontFamily: Tokens.spaceGrotesk,
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
-                  color: isSelected || isToday ? Tokens.ink : Tokens.dim,
+                  color: isSelected || isToday ? t.ink : t.dim,
                 ),
               ),
             ],

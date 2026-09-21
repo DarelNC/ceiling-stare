@@ -8,61 +8,68 @@ import '../domain/caffeine.dart';
 import '../domain/presets.dart';
 import '../domain/today.dart';
 import '../state/dose_log.dart';
+import '../state/theme_controller.dart';
 import 'hard_button.dart';
 import 'history_screen.dart';
 import 'menu.dart';
 import 'mug.dart';
 import 'shared.dart';
+import 'theme_screen.dart';
+import 'themed_background.dart';
 import 'tokens.dart';
+import 'app_theme.dart';
 
-ThemeData _pickerTheme(ThemeData base) {
+ThemeData _pickerTheme(ThemeData base, CsTheme t) {
   Color selected(Set<WidgetState> s, Color on, Color off) =>
       s.contains(WidgetState.selected) ? on : off;
-  const edge = RoundedRectangleBorder(
-    side: BorderSide(color: Tokens.ink, width: 2),
-  );
+  final edge = RoundedRectangleBorder(side: BorderSide(color: t.ink, width: 2));
   return base.copyWith(
-    colorScheme: const ColorScheme.dark(
-      primary: Tokens.signal,
-      onPrimary: Tokens.ground,
-      surface: Tokens.ground,
-      onSurface: Tokens.ink,
+    colorScheme: ColorScheme(
+      brightness: t.brightness,
+      primary: t.signal,
+      onPrimary: t.onSignal,
+      secondary: t.signal,
+      onSecondary: t.onSignal,
+      error: t.alert,
+      onError: t.ink,
+      surface: t.ground,
+      onSurface: t.ink,
     ),
     timePickerTheme: TimePickerThemeData(
-      backgroundColor: Tokens.ground,
+      backgroundColor: t.ground,
       shape: edge,
       hourMinuteShape: edge,
       dayPeriodShape: edge,
-      dayPeriodBorderSide: const BorderSide(color: Tokens.ink, width: 2),
+      dayPeriodBorderSide: BorderSide(color: t.ink, width: 2),
       hourMinuteColor: WidgetStateColor.resolveWith(
-        (s) => selected(s, Tokens.signal, Tokens.groundDeep),
+        (s) => selected(s, t.signal, t.mugInner),
       ),
       hourMinuteTextColor: WidgetStateColor.resolveWith(
-        (s) => selected(s, Tokens.ground, Tokens.ink),
+        (s) => selected(s, t.onSignal, t.ink),
       ),
       dayPeriodColor: WidgetStateColor.resolveWith(
-        (s) => selected(s, Tokens.signal, Colors.transparent),
+        (s) => selected(s, t.signal, Colors.transparent),
       ),
       dayPeriodTextColor: WidgetStateColor.resolveWith(
-        (s) => selected(s, Tokens.ground, Tokens.ink),
+        (s) => selected(s, t.onSignal, t.ink),
       ),
-      dialBackgroundColor: Tokens.groundDeep,
-      dialHandColor: Tokens.signal,
+      dialBackgroundColor: t.mugInner,
+      dialHandColor: t.signal,
       dialTextColor: WidgetStateColor.resolveWith(
-        (s) => selected(s, Tokens.ground, Tokens.ink),
+        (s) => selected(s, t.onSignal, t.ink),
       ),
-      entryModeIconColor: Tokens.mutedInk,
-      helpTextStyle: const TextStyle(
+      entryModeIconColor: t.mutedInk,
+      helpTextStyle: TextStyle(
         fontFamily: Tokens.spaceGrotesk,
         fontWeight: FontWeight.w700,
         letterSpacing: 2.2,
         fontSize: 11,
-        color: Tokens.mutedInk,
+        color: t.mutedInk,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: Tokens.signal,
+        foregroundColor: t.signal,
         shape: const RoundedRectangleBorder(),
         textStyle: const TextStyle(
           fontFamily: Tokens.spaceGrotesk,
@@ -74,9 +81,10 @@ ThemeData _pickerTheme(ThemeData base) {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.log});
+  const HomeScreen({super.key, required this.log, required this.themes});
 
   final DoseLog log;
+  final ThemeController themes;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -159,8 +167,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final t = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_log.clock()),
-      builder: (context, child) =>
-          Theme(data: _pickerTheme(Theme.of(context)), child: child!),
+      builder: (context, child) => Theme(
+        data: _pickerTheme(Theme.of(context), context.cs),
+        child: child!,
+      ),
     );
     if (t != null && mounted) {
       setState(() {
@@ -171,12 +181,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _other() async {
+    final t = context.cs;
     final mg = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Tokens.ground,
-      shape: const RoundedRectangleBorder(
-        side: BorderSide(color: Tokens.ink, width: 2),
+      backgroundColor: t.ground,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: t.ink, width: t.border),
       ),
       builder: (_) => const _OtherSheet(),
     );
@@ -187,94 +198,184 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => HistoryScreen(log: _log)));
 
+  Future<void> _openTheme() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => ThemeScreen(controller: widget.themes),
+    ),
+  );
+
   Future<void> _openMenu() async {
     final choice = await showAppMenu(context);
-    if (choice == MenuDestination.history && mounted) await _openHistory();
+    if (!mounted) return;
+    switch (choice) {
+      case MenuDestination.history:
+        await _openHistory();
+      case MenuDestination.theme:
+        await _openTheme();
+      case null:
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     return Scaffold(
-      backgroundColor: Tokens.ground,
-      body: SafeArea(
-        child: ListenableBuilder(
-          listenable: _log,
-          builder: (context, _) {
-            final now = _log.now;
-            final today = dosesToday(_log.doses, now);
-            final active = remainingMg(_log.doses, now);
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 40),
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'CEILING STARE',
-                      style: TextStyle(
-                        fontFamily: Tokens.majorMono,
-                        color: Tokens.ink,
-                        fontSize: 13,
-                        letterSpacing: 3,
-                      ),
+      backgroundColor: t.ground,
+      body: ThemedBackground(
+        // A solid band runs up behind the status bar, so its icons go light.
+        overlay: t.bandHeader ? SystemUiOverlayStyle.light : null,
+        child: SafeArea(
+          top: !t.bandHeader,
+          child: ListenableBuilder(
+            listenable: _log,
+            builder: (context, _) {
+              final now = _log.now;
+              final today = dosesToday(_log.doses, now);
+              final active = remainingMg(_log.doses, now);
+              return Column(
+                children: [
+                  _Header(onMenu: _openMenu),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(22, 26, 22, 40),
+                      children: [
+                        if (_log.error != null)
+                          ErrorBlock(error: _log.error!)
+                        else ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Mug(activeMg: active),
+                              const SizedBox(width: 8),
+                              Expanded(child: _Readout(activeMg: active)),
+                            ],
+                          ),
+                          if (t.accentBar) ...[
+                            const SizedBox(height: 20),
+                            Container(height: 16, color: t.signal),
+                            const SizedBox(height: 4),
+                          ],
+                          const SizedBox(height: 22),
+                          _TodayLine(
+                            count: today.length,
+                            mg: totalMg(today),
+                            onSeeLog: _openHistory,
+                          ),
+                          const SizedBox(height: 30),
+                          const Label('TAP TO LOG'),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Typical amounts. Other takes the real number.',
+                            style: TextStyle(
+                              fontFamily: Tokens.spaceGrotesk,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                              color: t.dim,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _WhenRow(
+                            ago: _ago,
+                            picked: _picked,
+                            onNow: () => setState(() {
+                              _ago = null;
+                              _picked = null;
+                            }),
+                            onAgo: (d) => setState(() {
+                              _ago = d;
+                              _picked = null;
+                            }),
+                            onPick: _pickTime,
+                          ),
+                          const SizedBox(height: 18),
+                          _PresetGrid(
+                            onPreset: (p) => _logDose(p.source, p.mg),
+                            onOther: _other,
+                          ),
+                        ],
+                      ],
                     ),
-                    const Spacer(),
-                    MenuButton(onTap: _openMenu),
-                  ],
-                ),
-                const SizedBox(height: 26),
-                if (_log.error != null)
-                  ErrorBlock(error: _log.error!)
-                else ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Mug(activeMg: active),
-                      const SizedBox(width: 8),
-                      Expanded(child: _Readout(activeMg: active)),
-                    ],
-                  ),
-                  const SizedBox(height: 26),
-                  _TodayLine(
-                    count: today.length,
-                    mg: totalMg(today),
-                    onSeeLog: _openHistory,
-                  ),
-                  const SizedBox(height: 30),
-                  const Label('TAP TO LOG'),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Typical amounts. Other takes the real number.',
-                    style: TextStyle(
-                      fontFamily: Tokens.spaceGrotesk,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                      color: Tokens.dim,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _WhenRow(
-                    ago: _ago,
-                    picked: _picked,
-                    onNow: () => setState(() {
-                      _ago = null;
-                      _picked = null;
-                    }),
-                    onAgo: (d) => setState(() {
-                      _ago = d;
-                      _picked = null;
-                    }),
-                    onPick: _pickTime,
-                  ),
-                  const SizedBox(height: 18),
-                  _PresetGrid(
-                    onPreset: (p) => _logDose(p.source, p.mg),
-                    onOther: _other,
                   ),
                 ],
-              ],
-            );
-          },
+              );
+            },
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Wordmark and MENU. Some themes turn it into a solid band or add
+/// drawing-office labels under it.
+class _Header extends StatelessWidget {
+  const _Header({required this.onMenu});
+
+  final VoidCallback onMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.cs;
+    final band = t.bandHeader;
+    final wordmark = Text(
+      'CEILING STARE',
+      style: TextStyle(
+        fontFamily: Tokens.majorMono,
+        color: band ? t.ground : t.ink,
+        fontSize: 13,
+        letterSpacing: 3,
+      ),
+    );
+    final row = Row(
+      children: [
+        wordmark,
+        const Spacer(),
+        MenuButton(onTap: onMenu, inverted: band),
+      ],
+    );
+    if (band) {
+      return Container(
+        color: t.ink,
+        padding: EdgeInsets.fromLTRB(
+          22,
+          12 + MediaQuery.paddingOf(context).top,
+          22,
+          12,
+        ),
+        child: row,
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
+      child: Column(
+        children: [
+          row,
+          if (t.titleBlock) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.symmetric(horizontal: BorderSide(color: t.rule)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (final text in ['DWG. CS-01', 'SCALE 1 : 1'])
+                    Text(
+                      text,
+                      style: TextStyle(
+                        fontFamily: Tokens.majorMono,
+                        fontSize: 10,
+                        letterSpacing: 1,
+                        color: t.mutedInk,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -286,6 +387,7 @@ class _Readout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -298,37 +400,27 @@ class _Readout extends StatelessWidget {
           builder: (_, value, _) => FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(
-              '${value.round()}',
-              style: const TextStyle(
-                fontFamily: Tokens.archivoBlack,
-                fontSize: 68,
-                height: 1,
-                letterSpacing: -2,
-                color: Tokens.ink,
-                shadows: [Shadow(color: Tokens.rust, offset: Offset(4, 4))],
-              ),
-            ),
+            child: BigNumber('${value.round()}'),
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'MG',
           style: TextStyle(
             fontFamily: Tokens.majorMono,
             fontSize: 13,
             letterSpacing: 3,
-            color: Tokens.ink,
+            color: t.ink,
           ),
         ),
         const SizedBox(height: 12),
         Text(
           'estimate, ${defaultHalfLife.inHours} h half-life',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: Tokens.spaceGrotesk,
             fontWeight: FontWeight.w500,
             fontSize: 12,
-            color: Tokens.dim,
+            color: t.dim,
           ),
         ),
       ],
@@ -348,7 +440,15 @@ class _TodayLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final t = context.cs;
+    // Themes with a stat panel put this line on an inverted block.
+    final panel = t.statPanel;
+    final labelColor = panel ? t.signal : t.mutedInk;
+    final numberColor = panel ? t.ground : t.ink;
+    final countColor = panel ? t.ground.withValues(alpha: 0.65) : t.dim;
+    final linkColor = panel ? t.signal : t.accentText;
+
+    final line = Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
@@ -362,24 +462,24 @@ class _TodayLine extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                const Label('TODAY'),
+                Label('TODAY', color: labelColor),
                 const SizedBox(width: 14),
                 Text(
                   '$mg MG',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: Tokens.archivoBlack,
                     fontSize: 26,
-                    color: Tokens.ink,
+                    color: numberColor,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   count == 1 ? '1 drink' : '$count drinks',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: Tokens.spaceGrotesk,
                     fontWeight: FontWeight.w500,
                     fontSize: 13,
-                    color: Tokens.dim,
+                    color: countColor,
                   ),
                 ),
               ],
@@ -394,8 +494,8 @@ class _TodayLine extends StatelessWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onSeeLog,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               child: Text(
                 'SEE LOG',
                 style: TextStyle(
@@ -403,9 +503,9 @@ class _TodayLine extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
                   letterSpacing: 1.6,
-                  color: Tokens.signal,
+                  color: linkColor,
                   decoration: TextDecoration.underline,
-                  decorationColor: Tokens.signal,
+                  decorationColor: linkColor,
                   decorationThickness: 2,
                 ),
               ),
@@ -413,6 +513,12 @@ class _TodayLine extends StatelessWidget {
           ),
         ),
       ],
+    );
+    if (!panel) return line;
+    return Container(
+      color: t.ink,
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+      child: line,
     );
   }
 }
@@ -434,6 +540,7 @@ class _WhenRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     Widget chip(
       String label,
       bool selected,
@@ -451,10 +558,10 @@ class _WhenRow extends StatelessWidget {
           duration: const Duration(milliseconds: 90),
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? Tokens.signal : Colors.transparent,
+            color: selected ? t.signal : Colors.transparent,
             border: Border.all(
-              color: selected ? Tokens.signal : Tokens.dim,
-              width: 2,
+              color: selected ? t.signal : t.dim,
+              width: t.border,
             ),
           ),
           child: Text(
@@ -464,7 +571,7 @@ class _WhenRow extends StatelessWidget {
               fontWeight: FontWeight.w700,
               fontSize: 12,
               letterSpacing: 0.8,
-              color: selected ? Tokens.ground : Tokens.ink,
+              color: selected ? t.onSignal : t.ink,
             ),
           ),
         ),
@@ -597,6 +704,7 @@ class _OtherSheetState extends State<_OtherSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.cs;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         22,
@@ -619,36 +727,36 @@ class _OtherSheetState extends State<_OtherSheet> {
               LengthLimitingTextInputFormatter(4),
             ],
             onChanged: (_) => setState(() {}),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: Tokens.archivoBlack,
               fontSize: 44,
-              color: Tokens.ink,
+              color: t.ink,
             ),
-            cursorColor: Tokens.signal,
-            decoration: const InputDecoration(
+            cursorColor: t.signal,
+            decoration: InputDecoration(
               hintText: '0',
-              hintStyle: TextStyle(color: Tokens.dim),
+              hintStyle: TextStyle(color: t.dim),
               suffixText: 'MG',
               suffixStyle: TextStyle(
                 fontFamily: Tokens.majorMono,
                 fontSize: 14,
-                color: Tokens.mutedInk,
+                color: t.mutedInk,
               ),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Tokens.ink, width: 2),
+                borderSide: BorderSide(color: t.ink, width: 2),
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Tokens.signal, width: 2),
+                borderSide: BorderSide(color: t.signal, width: 2),
               ),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Whole milligrams, 1 to $maxDoseMg.',
             style: TextStyle(
               fontFamily: Tokens.spaceGrotesk,
               fontSize: 12,
-              color: Tokens.dim,
+              color: t.dim,
             ),
           ),
           const SizedBox(height: 22),

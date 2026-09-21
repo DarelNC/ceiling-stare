@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../domain/caffeine.dart';
+import 'app_theme.dart';
 import 'tokens.dart';
 
 /// A mug built from bordered boxes. The liquid is the caffeine still active,
@@ -13,29 +14,31 @@ class Mug extends StatelessWidget {
 
   static const _bodyW = 108.0;
   static const _bodyH = 150.0;
-  static const _wall = 3.0;
   static const _bodyLeft = 46.0;
   static const _marks = [100, 200, 300, 400];
 
   @override
   Widget build(BuildContext context) {
-    final inner = _bodyH - _wall * 2;
+    final t = context.cs;
+    final wall = t.border > 1 ? 3.0 : 2.0;
+    final inner = _bodyH - wall * 2;
     final fraction = (activeMg / referenceLimitMg).clamp(0.0, 1.0);
     final over = activeMg > referenceLimitMg;
+    final lift = t.shadowOffset;
 
     return Semantics(
       label: '${activeMg.round()} milligrams active',
       child: ExcludeSemantics(
         child: SizedBox(
           width: _bodyLeft + _bodyW + 36,
-          height: _bodyH + Tokens.shadow * 2,
+          height: _bodyH + 8,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               for (final mark in _marks)
                 Positioned(
                   left: 0,
-                  bottom: _wall + inner * (mark / referenceLimitMg) - 6 + 4,
+                  bottom: wall + inner * (mark / referenceLimitMg) - 6 + 4,
                   child: Row(
                     children: [
                       SizedBox(
@@ -43,28 +46,28 @@ class Mug extends StatelessWidget {
                         child: Text(
                           '$mark',
                           textAlign: TextAlign.right,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: Tokens.majorMono,
                             fontSize: 10,
                             height: 1.2,
-                            color: Tokens.mutedInk,
+                            color: t.mutedInk,
                           ),
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Container(width: 8, height: 2, color: Tokens.dim),
+                      Container(width: 8, height: 2, color: t.dim),
                     ],
                   ),
                 ),
               // Handle sits behind the body so the body wall closes its left edge.
               Positioned(
-                left: _bodyLeft + _bodyW - _wall,
+                left: _bodyLeft + _bodyW - wall,
                 bottom: 40 + 4,
                 width: 34,
                 height: 66,
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Tokens.ink, width: _wall),
+                    border: Border.all(color: t.ink, width: wall),
                   ),
                 ),
               ),
@@ -75,14 +78,16 @@ class Mug extends StatelessWidget {
                 height: _bodyH,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Tokens.groundDeep,
-                    border: Border.all(color: Tokens.ink, width: _wall),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Tokens.rust,
-                        offset: Offset(Tokens.shadow + 2, Tokens.shadow + 2),
-                      ),
-                    ],
+                    color: t.mugInner,
+                    border: Border.all(color: t.ink, width: wall),
+                    boxShadow: lift > 0
+                        ? [
+                            BoxShadow(
+                              color: t.shadow,
+                              offset: Offset(lift + 2, lift + 2),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Align(
                     alignment: Alignment.bottomCenter,
@@ -93,7 +98,7 @@ class Mug extends StatelessWidget {
                       heightFactor: fraction,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 400),
-                        color: over ? Tokens.alert : Tokens.signal,
+                        color: over ? t.alert : t.signal,
                       ),
                     ),
                   ),
