@@ -47,17 +47,17 @@ centering exception is a single-element empty state.
 | DM Serif Display italic — the human line | `DM Serif Display Italic` |
 | Space Grotesk — labels, captions, body | `Space Grotesk` |
 
-**Palette** (values from `caffeinated/lib/main.dart`, declared in
-`lib/ui/tokens.dart`):
+**Palette, Oxblood** (values from `caffeinated/lib/main.dart`, declared in
+`lib/ui/app_theme.dart`):
 
 | Token | Value | Used for |
 |---|---|---|
 | `ground` | `#2A0F14` | page background |
-| `groundDeep` | `#140609` | inside of the mug |
+| `mugInner` (was `groundDeep`) | `#140609` | inside of the mug |
 | `ink` | `#F6EFE6` | primary text, borders |
 | `mutedInk` | `#D8B6AD` | labels, secondary text |
 | `dim` | `#8F6A62` | captions, scale ticks, disabled |
-| `rust` | `#8C2F1B` | every hard shadow |
+| `shadow` and `rule` (was `rust`) | `#8C2F1B` | every hard shadow, thin separators |
 | `signal` | `#E9FF4F` | the liquid, press flash, focus underline |
 | `alert` | `#FF5C1C` | liquid past the reference limit |
 | `emberGlow` | `#6B1F18` | not declared yet; add when a screen uses it |
@@ -80,6 +80,19 @@ right over a dimmed ground. The history trend strip reuses the mug's semantics:
 signal-yellow bars, alert orange past the 400 mg reference, the reference in a
 left gutter in Major Mono. Day sections are separated by a 2 px ink rule under
 each day header and 1 px rust rules between doses.
+
+## Themes
+
+The look above is now one of five, called **Oxblood**, and remains the default.
+The others (Paper, Newsprint, Acid, Blueprint) come from reference posters and
+are chosen from the menu. Palettes, background textures and the structural
+switches for each are in [features/themes.md](features/themes.md); the values
+live in `lib/ui/app_theme.dart`. Two rules for anyone touching UI:
+
+- Never hard-code a colour. Read it from `context.cs`. The palette table above
+  documents Oxblood only.
+- Keep the roles: `signal` is the liquid and selected state, `alert` is past the
+  limit, `ink` is text and borders. Themes change values, not meanings.
 
 ## Why reuse this identity: the reuse check
 
@@ -123,6 +136,12 @@ were assigned for a screen-awake utility.
   hard to read, and it was exactly the general "techy signal" use the reuse
   check rules out. Replaced by Space Grotesk bold caps with letter-spacing, which
   is also what `caffeinated` uses for labels.
+- **A scrim that blended into a solid.** The menu's dim layer first came out
+  nearly opaque black because the colour was blended instead of made
+  translucent. Fixed; caught by looking at the running app.
+- **Picker cards as screenshots or hand-drawn mockups.** Rejected for real
+  widgets rendered inside a nested theme scope, so a card can't drift from the
+  app it previews.
 - **Today's log on the home screen.** Built first, then moved to the history
   screen: with the chip row it sat under the fold, and the home screen was
   carrying too many features. Every log now raises an undo bar instead.

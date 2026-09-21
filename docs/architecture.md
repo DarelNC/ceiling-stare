@@ -47,3 +47,7 @@ No storage, UI, or platform imports, and no knowledge of where a dose came from.
   the log or talk to the repository directly, and the pure functions in
   `lib/domain/` (decay, today, history) take plain `Dose` lists from it. See
   [features/history.md](features/history.md).
+- **Colours and switches come from a theme, not from widgets.** `CsTheme`
+  (`lib/ui/app_theme.dart`) is read with `context.cs`; the chosen id is kept by
+  `ThemeController`, separate from the dose log. See
+  [features/themes.md](features/themes.md).

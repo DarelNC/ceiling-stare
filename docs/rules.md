@@ -33,9 +33,9 @@ hand-entered amount), optionally backdated up to 24 hours; see today's total and
 an estimate of caffeine still active as a draining mug; undo any log. A menu
 leads to a history screen (14-day trend strip, every dose grouped by day, removal).
 All local, no accounts. Details in [features/](features/README.md). `flutter
-analyze` is clean and 103 tests pass. Run and seen on the iOS simulator (iPhone
-17 Pro, 2026-09-20); **never run on Android**. Not yet built: notifications,
-safe-to-sleep, verified preset values, drink names in the log.
+analyze` is clean and 167 tests pass. Run and seen on the iOS simulator (iPhone
+17 Pro, 2026-09-21); **never run on Android**. Five themes are selectable from
+the menu (default Oxblood). Not yet built: notifications, safe-to-sleep, verified preset values, drink names in the log.
 
 ## Hard rules
 

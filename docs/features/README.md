@@ -14,6 +14,8 @@ One file per feature, created when that feature is actually decided:
   readouts, one-tap presets, Other, undo on every log.
 - [history.md](history.md) — the menu, and a history screen: 14-day trend strip
   plus every dose grouped by day, with removal. Today's log moved here from home.
+- [themes.md](themes.md): five looks (Oxblood, Paper, Newsprint, Acid,
+  Blueprint) chosen from menu entry 02, each previewed with the real widgets.
 - [backdating.md](backdating.md) — log a dose at an earlier time: −30 MIN, −1 H,
   −2 H chips or a picked time of day.
 
