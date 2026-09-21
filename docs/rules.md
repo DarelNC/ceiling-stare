@@ -67,7 +67,14 @@ Tiered, per [`process.md`](../../rules/process.md):
   strongest reason it's wrong or premature. If nothing survives, say so; don't
   invent an objection.
 - **Publish gate:** doc-sync before anything goes public (push, PR, release).
-  Nothing has been pushed, so nothing is owed yet.
+  First push: 2026-09-21, to `git@github.com:DarelNC/ceiling-stare.git`, after a
+  doc-sync pass. Every later push or PR is subject to the same gate.
+
+  **Known gaps at first publish** (recorded rather than fixed, by choice): no
+  `LICENSE` file although MIT is the stated default; preset caffeine values are
+  recalled figures, not checked against a cited source; the name has US-only
+  trademark clearance and an incomplete handle check; the app ID is the
+  unpublishable placeholder `com.example.ceilingstare`; never run on Android.
 
 ## Adaptation ledger (workspace rules → this project)
 

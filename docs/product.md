@@ -31,9 +31,9 @@ there is a reason to; the ID can be changed later with a find-and-replace across
 `ios/Runner.xcodeproj/project.pbxproj`. Changing the ID after a release ships a
 different app to the stores, so settle it before the first submission.
 
-**Not renamed:** the project folder is still `wired/` in the workspace, since
-moving it affects the workspace and every open session. Local data from the old
-bundle ID was not migrated (there were no users), so the renamed app starts empty.
+**Folder:** the project folder was renamed from `wired/` to `ceiling-stare/`
+(matching the GitHub repository) on 2026-09-21. Local data from the old bundle ID
+was not migrated (there were no users), so the renamed app starts empty.
 
 Applied independently of `caffeinated`. A check on one sibling says nothing
 about the other. Everything below must be finished before anything goes public
