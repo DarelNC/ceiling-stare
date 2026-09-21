@@ -4,6 +4,11 @@ Status: **built** (2026-09-21), checked on the iOS simulator in all five. Code:
 `lib/ui/app_theme.dart`, `lib/ui/themed_background.dart`,
 `lib/ui/theme_screen.dart`, `lib/state/theme_controller.dart`.
 
+**Decision, 2026-09-21:** keep three themes, Oxblood (the default), Newsprint and
+Blueprint. Paper and Acid are to be removed, along with the switches only they
+used. That removal is not done yet, so all five still ship and the text below
+describes all five.
+
 ## What it does
 
 The menu has a second entry, `02 THEME`. It opens a screen with one card per
