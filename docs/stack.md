@@ -63,7 +63,7 @@ no benefit. Same call as `caffeinated`.
 ## License and branch
 
 - **MIT** unless there's a specific reason otherwise. No reason has come up.
-  **Gap:** the project has no `LICENSE` file. `caffeinated/LICENSE` is the
-  template (MIT, 2026, DarelNC).
+  The `LICENSE` file was added on 2026-09-21, copied from `caffeinated/LICENSE`
+  (MIT, 2026, DarelNC).
 - **Default branch is `master`.** Current branch is `master`. Remote:
   `git@github.com:DarelNC/ceiling-stare.git`, first pushed 2026-09-21.

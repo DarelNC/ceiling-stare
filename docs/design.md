@@ -42,10 +42,10 @@ centering exception is a single-element empty state.
 
 | Face | Family key in code |
 |---|---|
-| Archivo Black — headlines | `Archivo Black` |
-| Major Mono Display — readouts and the wordmark | `Major Mono Display` |
-| DM Serif Display italic — the human line | `DM Serif Display Italic` |
-| Space Grotesk — labels, captions, body | `Space Grotesk` |
+| Archivo Black: headlines | `Archivo Black` |
+| Major Mono Display: readouts and the wordmark | `Major Mono Display` |
+| DM Serif Display italic: the human line | `DM Serif Display Italic` |
+| Space Grotesk: labels, captions, body | `Space Grotesk` |
 
 **Palette, Oxblood** (values from `caffeinated/lib/main.dart`, declared in
 `lib/ui/app_theme.dart`):
@@ -83,9 +83,9 @@ each day header and 1 px rust rules between doses.
 
 ## Themes
 
-The look above is now one of five, called **Oxblood**, and remains the default.
-The others (Paper, Newsprint, Acid, Blueprint) come from reference posters and
-are chosen from the menu. Palettes, background textures and the structural
+The look above is now one of three, called **Oxblood**, and remains the default.
+The others (Newsprint and Blueprint) come from reference posters and are chosen
+from the menu. Palettes, background textures and the structural
 switches for each are in [features/themes.md](features/themes.md); the values
 live in `lib/ui/app_theme.dart`. Two rules for anyone touching UI:
 

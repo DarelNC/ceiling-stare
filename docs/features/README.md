@@ -6,18 +6,19 @@ One file per feature, created when that feature is actually decided:
 
 ## Built
 
-- [dose-model.md](dose-model.md) — `Dose` model and local storage behind a
+- [dose-model.md](dose-model.md): `Dose` model and local storage behind a
   `DoseRepository`.
-- [decay-math.md](decay-math.md) — `remainingMg`: estimated caffeine still
-  active, a pure function over doses.
-- [core-screen.md](core-screen.md) — the single screen: mug, active and today
-  readouts, one-tap presets, Other, undo on every log.
-- [history.md](history.md) — the menu, and a history screen: 14-day trend strip
-  plus every dose grouped by day, with removal. Today's log moved here from home.
-- [themes.md](themes.md): five looks (Oxblood, Paper, Newsprint, Acid,
-  Blueprint) chosen from menu entry 02, each previewed with the real widgets.
-- [backdating.md](backdating.md) — log a dose at an earlier time: −30 MIN, −1 H,
-  −2 H chips or a picked time of day.
+- [decay-math.md](decay-math.md): `remainingMg`, the estimated caffeine still
+  active, as a pure function over doses.
+- [core-screen.md](core-screen.md): the home screen, with the mug, the active and
+  today readouts, one-tap presets, Other and undo on every log.
+- [history.md](history.md): the menu and a history screen with a 14-day trend
+  strip and every dose grouped by day, with removal. Today's log moved here from
+  home.
+- [themes.md](themes.md): three looks (Oxblood, Newsprint, Blueprint) chosen from
+  menu entry 02, each previewed with the real widgets.
+- [backdating.md](backdating.md): log a dose at an earlier time, with −30 MIN,
+  −1 H and −2 H chips or a picked time of day.
 
 ## Backlog, in order
 
@@ -47,6 +48,9 @@ explicitly when it's reached, not a commitment.
   says matter, under-18 handling, how it changes the mug scale and the
   over-limit colour, and wording that reads as a reference, not medical advice.
   The data would stay on the device.
+- **UI and font cleanup.** Major Mono Display (wordmark, mug scale marks, the MG
+  unit, log-row times and amounts) is not liked. Pick a replacement and update the
+  type roles in [../design.md](../design.md).
 - **Show the caffeine drop over time.** The decay already exists (5 hour
   half-life, about 9 mg per 20 minutes at 200 mg active). Undecided whether to
   show the rate and a "clear by" time, tick the number more often, or change the
@@ -70,7 +74,7 @@ explicitly when it's reached, not a commitment.
 
 ## Cut list
 
-- **Accounts, cloud sync, any backend — out of v1.** Reason in
+- **Accounts, cloud sync, any backend: out of v1.** Reason in
   [../product.md](../product.md).
 - **Nothing ported from a predecessor**, so there is no inherited-feature cut
   list yet. Add entries here when an idea is considered and deliberately

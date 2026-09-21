@@ -21,7 +21,7 @@ these don't engage today:
 drink database API for caffeine-per-serving values. v1 avoids it by shipping
 any presets as bundled local data (see [features/README.md](features/README.md),
 item 1). Adding a network source would mean a backend in front of it, which
-also contradicts the local-only stance in [product.md](product.md) — that's a
+also contradicts the local-only stance in [product.md](product.md). That's a
 decision-lane change, not an implementation detail.
 
 Health Connect (Android) and HealthKit (iOS) are local OS APIs, not third-party
@@ -35,7 +35,7 @@ should be a pure function: doses and a point in time in, remaining caffeine out.
 No storage, UI, or platform imports, and no knowledge of where a dose came from.
 
 - **Why it matters here:** testable without a device or mocks (see
-  [stack.md](stack.md) — this is the first thing worth a real test suite), and
+  [stack.md](stack.md); this is the first thing worth a real test suite), and
   a later HealthKit/Health Connect import or a different local store feeds the
   same function instead of forcing a rewrite.
 - **Built:** `remainingMg` in `lib/domain/caffeine.dart` follows this seam. It
